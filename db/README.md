@@ -13,4 +13,9 @@ Shared Neon project with the landing site (`memberships` and other landing table
   The members app also ensures the table and columns exist on first Admin Library /
   download check (`CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS`).
 
+Admin Library also **seeds** a row (all flags `false`, `updated_by` NULL) for every
+slug discovered on R2 under `pack-a/` or `pack-a/teasers/` (`INSERT … ON CONFLICT DO
+NOTHING`, never overwrites flags). A Neon row is what makes a non–Pack A slug "known"
+to the flag, preview and download routes.
+
 Toggle values do **not** require the PDF to exist on R2.

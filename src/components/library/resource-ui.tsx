@@ -161,7 +161,11 @@ export function ResultCount({
   );
 }
 
-/** Resources card anatomy: icon box + pills, bold title, muted description, body, footer. */
+/**
+ * Resources card anatomy: icon box + pills, bold title, muted description, body, footer.
+ * Optional `leading` (e.g. Admin select control) sits before the icon; `selected` rings
+ * the card in ink.
+ */
 export function ResourceCard({
   slug,
   pills,
@@ -169,6 +173,8 @@ export function ResourceCard({
   description,
   children,
   footer,
+  leading,
+  selected = false,
 }: {
   slug: string;
   pills: ReactNode;
@@ -176,13 +182,24 @@ export function ResourceCard({
   description: string;
   children?: ReactNode;
   footer: ReactNode;
+  leading?: ReactNode;
+  selected?: boolean;
 }) {
   return (
-    <li className="flex flex-col rounded-2xl border border-[var(--ink-muted)]/20 bg-white p-6 transition-shadow duration-300 hover:shadow-lg">
+    <li
+      className={`flex flex-col rounded-2xl border bg-white p-6 transition-shadow duration-300 hover:shadow-lg ${
+        selected
+          ? "border-[var(--ink)] ring-2 ring-[var(--ink)]"
+          : "border-[var(--ink-muted)]/20"
+      }`}
+    >
       <div className="mb-6 flex items-start justify-between gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] text-[var(--ink)]">
-          <LibraryIcon slug={slug} />
-        </span>
+        <div className="flex shrink-0 items-center gap-3">
+          {leading}
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] text-[var(--ink)]">
+            <LibraryIcon slug={slug} />
+          </span>
+        </div>
         <div className="flex flex-wrap justify-end gap-2">{pills}</div>
       </div>
 

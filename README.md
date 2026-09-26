@@ -16,9 +16,10 @@ Thin member app for [International Founders Network](https://ifn.community) at *
 | `/library` | Pack A as a searchable, filterable Resources-style card grid; Download PDF only when entitled **and** Admin turned on **Member download** for that file |
 | `/account` | Email, plan, Stripe Customer Portal, Sign out |
 | `/admin/members` | Full Neon roster — Clerk `publicMetadata.role === "admin"` only |
-| `/admin/library` | Resources-style cards with **Approve public**, **Public teaser**, **Member download**, **Landing full download** switches and full/teaser PDF previews (Neon `library_assets`) — same admin role. Only Library SoT |
+| `/admin/library` | Resources-style cards for **every asset on R2** (auto-discovered + seeded) with **Approve public**, **Public teaser**, **Member download**, **Landing full download** switches, full/teaser PDF previews, multi-select and a sticky **bulk action bar** (Neon `library_assets`) — same admin role. Only Library SoT |
 | `/api/public/library` | Public JSON catalog (copy + flags + object keys, no auth, no secrets) for landing |
 | `/api/public/library/[slug]/teaser`, `/full` | Public landing downloads (302 to signed URL) while the matching flag is on |
+| `PATCH /api/admin/library/flags/bulk` | Admin bulk flag save for up to 100 slugs |
 
 Landing Google `/admin` is unchanged and does **not** show this roster or Library toggles. Members `/admin/library` is the single source of truth for Pack A flags.
 
@@ -52,7 +53,7 @@ npm run dev
 ```
 
 ```bash
-npm test          # entitlement + library flag/catalog unit tests
+npm test          # entitlement + library flag/catalog/discovery/bulk unit tests (R2 + Neon mocked)
 npm run build     # production build
 ```
 
@@ -82,13 +83,26 @@ Paste names from `/workspace/ifn-copy/2026-09-25-ifn-members-env-checklist.md` (
 
 ## Pack A storage
 
-Object keys (private R2/S3):
+Content uploads to private R2 at any time; this app only lists and serves:
 
-- `pack-a/visa-pathways.pdf`
-- `pack-a/entity-selection.pdf`
-- `pack-a/austin-ecosystem-map.pdf`
+- Full PDF: `pack-a/<slug>.pdf` (e.g. `pack-a/visa-pathways.pdf`)
+- Teaser: `pack-a/teasers/<slug>.pdf`
 
-Teaser objects: `pack-a/teasers/<slug>.pdf` (Content uploads them; this app only serves them).
+### Discovery (catalog grows with R2)
+
+The catalog is the union of three sources; an uploaded object is never dropped from Admin:
+
+1. **R2 discovery** (`src/lib/library-discover.ts`): one paginated `ListObjectsV2` on prefix `pack-a/` (`listPackAObjectKeys` in `src/lib/storage.ts`). `pack-a/<slug>.pdf` → full, `pack-a/teasers/<slug>.pdf` → teaser. Teaser-only uploads still appear. Ignored for now: non-PDFs (xlsx later), uppercase `.PDF`, deeper folders, and filenames that are not a safe slug (letters, digits, `-`, `_`).
+2. **Known Pack A** (`PACK_A` in `src/lib/library-catalog.ts`): title/description/tag overrides. Unknown slugs get a readable title from the slug (`austin-ecosystem-map` → “Austin ecosystem map”), tag `PDF` and a short placeholder description.
+3. **Neon rows** in `library_assets`.
+
+Order: Pack A first, then the rest alphabetically.
+
+**Seeding:** every `/admin/library` load runs discovery and then `ensureLibraryAssetsSeeded(slugs)`: `INSERT … ON CONFLICT (slug) DO NOTHING` with all flags **FALSE** and `updated_by` NULL (card shows “Discovered …”). Existing flags are never overwritten. New uploads are therefore listed, all off, the next time an admin opens the page, and their switches save immediately.
+
+**Known slug** (for flag saves, previews and downloads) = Pack A or has a Neon row. Member Library and `/api/public/library` also run discovery but never write (no seeding on public or member traffic). Admin cards show `No full PDF on R2` / `No teaser on R2` pills when the listing lacks an object.
+
+**Fail soft:** no R2 env or a listing error ⇒ catalog is Pack A + Neon rows (Admin still lists them; pills hidden). No DB ⇒ flags off everywhere.
 
 ### Asset flags (Admin)
 
@@ -102,7 +116,9 @@ Neon table `library_assets` stores three independent per-slug flags, all default
 
 **Approve public** is the primary Admin action. It sends `{ "approvePublic": true }`, which turns **Public teaser ON** automatically. The teaser can still be switched off afterward. It does not touch Member download or Landing full download.
 
-`PATCH /api/admin/library/[slug]/flags` accepts `{ downloadable?, teaserPublic?, landingFull?, approvePublic? }` (booleans; at least one flag must result). Omitted flags keep their stored value (COALESCE upsert), so saving one flag never wipes the others. `approvePublic: true` + `teaserPublic: false` is rejected as contradictory (400); `approvePublic: false` is a no-op. The response always returns all three flags:
+**Deny public** sends `{ "denyPublic": true }`, which turns **Public teaser OFF and Landing full download OFF** (clears both public surfaces). Member download is untouched.
+
+`PATCH /api/admin/library/[slug]/flags` accepts `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }` (booleans; at least one flag must result). Omitted flags keep their stored value (COALESCE upsert), so saving one flag never wipes the others. Contradictions are rejected (400): `approvePublic` + `teaserPublic: false`, `denyPublic` + `teaserPublic: true` or `landingFull: true`, `approvePublic` + `denyPublic`. `approvePublic: false` / `denyPublic: false` are no-ops. Unknown slug (not Pack A, no Neon row) ⇒ 404. The response always returns all three flags:
 
 ```json
 { "slug": "visa-pathways", "downloadable": false, "teaserPublic": true, "landingFull": false, "updated_at": "...", "updated_by": "..." }
@@ -110,7 +126,33 @@ Neon table `library_assets` stores three independent per-slug flags, all default
 
 Saving a flag does **not** require the PDF on R2.
 
-Admin `/admin/library` lists every Pack A entry (even with no Neon row) as Resources-style cards with search (title/slug/description) and status chips (All / Member download on / Public teaser on / Landing full on / All off).
+Admin `/admin/library` lists every discovered/known asset (even with no Neon row) as Resources-style cards with search (title/slug/description) and status chips (All / Member download on / Public teaser on / Landing full on / All off).
+
+### Bulk controls (Admin)
+
+Each card has a select checkbox (selected cards get an ink ring). **Select all filtered** adds every card matching the current search + status chip; **Clear selection** empties it. While anything is selected, a sticky bar at the bottom shows the count (and how many are hidden by the current filter) with:
+
+| Button | Patch sent |
+| --- | --- |
+| **Approve public** | `{ "approvePublic": true }` ⇒ Public teaser ON |
+| **Deny public** | `{ "denyPublic": true }` ⇒ Public teaser OFF + Landing full OFF |
+| Member download **On / Off** | `{ "downloadable": true \| false }` |
+| Public teaser **On / Off** | `{ "teaserPublic": true \| false }` |
+| Landing full **On / Off** | `{ "landingFull": true \| false }` |
+
+Every bulk action asks for confirmation. Per-card switches are unchanged.
+
+`PATCH /api/admin/library/flags/bulk` (Clerk admin only; 401/403 otherwise):
+
+```json
+{ "slugs": ["visa-pathways", "cap-table-basics"], "patch": { "approvePublic": true } }
+```
+
+- `slugs`: 1–100 (de-duplicated), each a safe slug; `patch`: same rules as the single-slug PATCH.
+- One statement (`INSERT … SELECT unnest(slugs) … ON CONFLICT DO UPDATE` with COALESCE), so omitted flags keep their per-slug values.
+- All-or-nothing: any unknown slug ⇒ 404 `{ "error": "Unknown library items", "unknownSlugs": [...] }` and nothing is written.
+- Success ⇒ `{ "updated": [{ "slug", "downloadable", "teaserPublic", "landingFull", "updated_at", "updated_by" }, ...] }`.
+- The Admin UI sends selections over 100 in sequential chunks of 100 and stops at the first failed chunk.
 
 ### Admin preview (review in place)
 
@@ -147,7 +189,7 @@ Member Library shows a disabled “Download unavailable” state when Member dow
 }
 ```
 
-`id` matches landing `resourcesData.ts` ids (`visa-pathways`, `entity-selection`, `austin-ecosystem-map`).
+`assets` = Pack A ∪ R2 discovery ∪ Neon rows (see Discovery). Pack A `id`s match landing `resourcesData.ts` (`visa-pathways`, `entity-selection`, `austin-ecosystem-map`); discovered assets use their slug, the derived title and the placeholder description, all flags off until Admin turns them on.
 
 ### Public downloads (landing)
 

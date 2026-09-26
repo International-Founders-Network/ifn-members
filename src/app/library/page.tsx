@@ -3,9 +3,7 @@ import { redirect } from "next/navigation";
 import { MemberLibrary } from "@/components/library/member-library";
 import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
-import { getLibraryAssetFlags } from "@/lib/library-assets";
-import { PACK_A } from "@/lib/library-catalog";
-import { defaultLibraryFlagsMap } from "@/lib/library-flags";
+import { listLibraryCatalogWithFlags } from "@/lib/library-assets";
 import { isMemberEntitled } from "@/lib/membership";
 
 export default async function LibraryPage() {
@@ -17,10 +15,9 @@ export default async function LibraryPage() {
     ? await isMemberEntitled(email)
     : { entitled: false as const, reason: "no_email" as const };
 
-  // Member on (`downloadable`) only; teaserPublic never unlocks the full PDF.
-  const assetFlags = entitlement.entitled
-    ? await getLibraryAssetFlags()
-    : defaultLibraryFlagsMap();
+  // Every uploaded asset is listed; Member on (`downloadable`) alone gates the full PDF.
+  // teaserPublic / landingFull never unlock it here.
+  const { items, flags: assetFlags } = await listLibraryCatalogWithFlags();
 
   return (
     <div className="space-y-8">
@@ -54,7 +51,7 @@ export default async function LibraryPage() {
 
       <MemberLibrary
         entitled={entitlement.entitled}
-        items={PACK_A.map((item) => ({
+        items={items.map((item) => ({
           slug: item.slug,
           title: item.title,
           description: item.description,

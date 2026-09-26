@@ -47,13 +47,22 @@ export default async function AdminLibraryPage() {
         <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
           Three independent per-file flags for Pack A, all <strong>off</strong>{" "}
           by default (a file with no saved row is fully off). Off always wins for
-          that surface.
+          that surface. Every PDF Content uploads to R2 under{" "}
+          <code className="text-sm">pack-a/</code> or{" "}
+          <code className="text-sm">pack-a/teasers/</code> shows up here on the next
+          load, with all flags off.
         </p>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-[var(--ink-muted)] leading-relaxed">
           <li>
             <strong className="text-[var(--ink)]">Approve public</strong> is the
             primary action: it turns <strong>Public teaser</strong> ON
             automatically. You can switch the teaser off afterward.
+          </li>
+          <li>
+            <strong className="text-[var(--ink)]">Bulk</strong>: tick files (or{" "}
+            <strong>Select all</strong> for the current search and filter), then use
+            the bar at the bottom. <strong>Deny public</strong> turns Public teaser
+            and Landing full off; Member download is left as is.
           </li>
           <li>
             <strong className="text-[var(--ink)]">Public teaser</strong>: landing

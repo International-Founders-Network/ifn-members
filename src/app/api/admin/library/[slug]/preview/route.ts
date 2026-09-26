@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isClerkAdmin } from "@/lib/auth-helpers";
-import { getLibraryItem, teaserObjectKey } from "@/lib/library-catalog";
+import { resolveLibraryItem } from "@/lib/library-assets";
+import { teaserObjectKey } from "@/lib/library-catalog";
 import { createSignedUrlForExistingObject } from "@/lib/storage";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -22,7 +23,7 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   const { slug } = await params;
-  const item = getLibraryItem(slug);
+  const item = await resolveLibraryItem(slug);
   if (!item) {
     return NextResponse.json({ error: "Unknown library item" }, { status: 404 });
   }

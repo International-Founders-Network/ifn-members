@@ -1,4 +1,4 @@
-import { PACK_A, teaserObjectKey } from "@/lib/library-catalog";
+import { PACK_A, teaserObjectKey, type LibraryItem } from "@/lib/library-catalog";
 
 /**
  * Per-asset surface flags. Off always wins for that surface.
@@ -32,12 +32,16 @@ export function defaultLibraryFlagsMap(): Record<string, LibraryAssetFlags> {
 
 /**
  * Validate an Admin PATCH body:
- * `{ downloadable?, teaserPublic?, landingFull?, approvePublic? }` (all boolean),
- * resolving to at least one flag. Returns null when invalid.
+ * `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }` (all
+ * boolean), resolving to at least one flag. Returns null when invalid.
  *
- * `approvePublic: true` is the primary Admin action and forces `teaserPublic: true`
- * (the teaser can still be turned off by a later patch). It is rejected alongside an
- * explicit `teaserPublic: false`. `approvePublic: false` is a no-op.
+ * - `approvePublic: true` is the primary Admin action and forces `teaserPublic: true`
+ *   (the teaser can still be turned off by a later patch).
+ * - `denyPublic: true` clears both public surfaces: `teaserPublic: false` and
+ *   `landingFull: false`. Member download is untouched.
+ *
+ * Contradictions (approve + `teaserPublic: false`, deny + a public flag `true`,
+ * approve + deny) are rejected. `approvePublic: false` / `denyPublic: false` are no-ops.
  */
 export function parseLibraryFlagsPatch(body: unknown): LibraryFlagsPatch | null {
   if (typeof body !== "object" || body === null) return null;
@@ -52,16 +56,67 @@ export function parseLibraryFlagsPatch(body: unknown): LibraryFlagsPatch | null 
     }
   }
 
-  if ("approvePublic" in b) {
-    if (typeof b.approvePublic !== "boolean") return null;
-    if (b.approvePublic) {
-      if (patch.teaserPublic === false) return null;
-      patch.teaserPublic = true;
-    }
+  for (const shortcut of ["approvePublic", "denyPublic"] as const) {
+    if (shortcut in b && typeof b[shortcut] !== "boolean") return null;
+  }
+  const approve = b.approvePublic === true;
+  const deny = b.denyPublic === true;
+  if (approve && deny) return null;
+
+  if (approve) {
+    if (patch.teaserPublic === false) return null;
+    patch.teaserPublic = true;
+  }
+
+  if (deny) {
+    if (patch.teaserPublic === true || patch.landingFull === true) return null;
+    patch.teaserPublic = false;
+    patch.landingFull = false;
   }
 
   if (FLAG_KEYS.every((key) => patch[key] === undefined)) return null;
   return patch;
+}
+
+/** Most slugs one bulk request may touch. */
+export const MAX_BULK_SLUGS = 100;
+
+export type LibraryBulkRequest = { slugs: string[]; patch: LibraryFlagsPatch };
+
+/**
+ * Validate `{ slugs: string[], patch: {...} }` for the bulk Admin PATCH. Slugs are
+ * de-duplicated; 1..MAX_BULK_SLUGS, each passing `isValidSlug`. `patch` follows
+ * `parseLibraryFlagsPatch`. Returns an error message instead of throwing.
+ */
+export function parseLibraryBulkRequest(
+  body: unknown,
+  isValidSlug: (slug: unknown) => slug is string,
+): LibraryBulkRequest | { error: string } {
+  if (typeof body !== "object" || body === null) {
+    return { error: "Body must be { slugs: string[], patch: {...} }" };
+  }
+  const b = body as Record<string, unknown>;
+
+  if (!Array.isArray(b.slugs) || b.slugs.length === 0) {
+    return { error: "slugs must be a non-empty array" };
+  }
+  if (!b.slugs.every(isValidSlug)) {
+    return { error: "Every slug must be a string of letters, digits, - or _" };
+  }
+  const slugs = [...new Set(b.slugs as string[])];
+  if (slugs.length > MAX_BULK_SLUGS) {
+    return { error: `At most ${MAX_BULK_SLUGS} slugs per request` };
+  }
+
+  const patch = parseLibraryFlagsPatch(b.patch);
+  if (!patch) {
+    return {
+      error:
+        "patch must include at least one boolean of downloadable, teaserPublic, landingFull, approvePublic: true or denyPublic: true (no contradictions)",
+    };
+  }
+
+  return { slugs, patch };
 }
 
 export type PublicLibraryAsset = {
@@ -77,13 +132,15 @@ export type PublicLibraryAsset = {
 
 /**
  * Thin public catalog for landing: copy, flags and object keys only (no signed URLs,
- * no secrets). Slugs missing from `flags` are reported as all off.
+ * no secrets). `items` is the merged catalog (PACK_A + R2 + Neon); defaults to PACK_A.
+ * Slugs missing from `flags` are reported as all off.
  */
 export function buildPublicLibraryCatalog(
   flags: Record<string, LibraryAssetFlags>,
+  items: LibraryItem[] = PACK_A,
 ): { assets: PublicLibraryAsset[] } {
   return {
-    assets: PACK_A.map((item) => {
+    assets: items.map((item) => {
       const f = flags[item.slug] ?? DEFAULT_LIBRARY_FLAGS;
       return {
         id: item.slug,

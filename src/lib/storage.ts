@@ -1,4 +1,9 @@
-import { GetObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export type SignedUrlResult =
@@ -136,4 +141,40 @@ export async function createSignedUrlForExistingObject(
   return signed.ok
     ? signed
     : { ok: false, status: 503, error: signed.reason, reason: "storage_not_configured" };
+}
+
+/** Safety cap on keys returned by one listing (1,000 per page). */
+const MAX_LISTED_KEYS = 10_000;
+
+/**
+ * Every object key under `prefix` (ListObjectsV2, paginated). Returns null when R2 env
+ * is missing so callers can fall back to known Pack A + Neon rows. Throws on R2 errors.
+ */
+export async function listObjectKeys(prefix: string): Promise<string[] | null> {
+  const client = getR2Client();
+  if (!client) return null;
+
+  const bucket = process.env.R2_BUCKET!.trim();
+  const keys: string[] = [];
+  let continuationToken: string | undefined;
+  do {
+    const page = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      }),
+    );
+    for (const object of page.Contents ?? []) {
+      if (object.Key) keys.push(object.Key);
+    }
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (continuationToken && keys.length < MAX_LISTED_KEYS);
+
+  return keys;
+}
+
+/** All keys under `pack-a/` (full PDFs and `pack-a/teasers/`). Null when R2 env is missing. */
+export function listPackAObjectKeys(): Promise<string[] | null> {
+  return listObjectKeys("pack-a/");
 }

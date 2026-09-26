@@ -2,12 +2,9 @@ import { NextResponse } from "next/server";
 import {
   isLibraryItemLandingFull,
   isLibraryItemTeaserPublic,
+  resolveLibraryItem,
 } from "@/lib/library-assets";
-import {
-  getLibraryItem,
-  teaserObjectKey,
-  type LibraryItem,
-} from "@/lib/library-catalog";
+import { teaserObjectKey, type LibraryItem } from "@/lib/library-catalog";
 import { publicCorsHeaders } from "@/lib/public-cors";
 import { createSignedUrlForExistingObject } from "@/lib/storage";
 
@@ -42,7 +39,7 @@ export async function publicLibraryDownload(
     "Cache-Control": "no-store",
   };
 
-  const item = getLibraryItem(slug);
+  const item = await resolveLibraryItem(slug);
   if (!item) {
     return NextResponse.json(
       { error: "Unknown library item", reason: "unknown_slug" },
