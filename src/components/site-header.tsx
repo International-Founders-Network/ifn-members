@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 
 export function SiteHeader({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
@@ -11,7 +11,7 @@ export function SiteHeader({ isAdmin = false }: { isAdmin?: boolean }) {
           IFN<span className="text-[var(--crimson)]">.</span> Members
         </Link>
         <nav className="flex items-center gap-4 text-sm text-[var(--ink)]">
-          <SignedIn>
+          <Show when="signed-in">
             <Link href="/library" className="hover:text-[var(--crimson)]">
               Library
             </Link>
@@ -24,8 +24,8 @@ export function SiteHeader({ isAdmin = false }: { isAdmin?: boolean }) {
               </Link>
             ) : null}
             <UserButton />
-          </SignedIn>
-          <SignedOut>
+          </Show>
+          <Show when="signed-out">
             <Link href="/sign-in" className="hover:text-[var(--crimson)]">
               Sign in
             </Link>
@@ -35,7 +35,7 @@ export function SiteHeader({ isAdmin = false }: { isAdmin?: boolean }) {
             >
               Sign up
             </Link>
-          </SignedOut>
+          </Show>
         </nav>
       </div>
     </header>

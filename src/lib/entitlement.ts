@@ -1,6 +1,6 @@
 /**
  * Membership entitlement from Neon `memberships` (Stripe webhooks on landing).
- * Auth ≠ paid. Soft-fail only — never invent entitlement.
+ * Auth is not the same as paid. Soft-fail only, never invent entitlement.
  *
  * Entitled when status is active | trialing, OR past_due within 7-day grace
  * measured from last_event_at.

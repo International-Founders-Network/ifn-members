@@ -5,9 +5,25 @@ import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
 import { isMemberEntitled } from "@/lib/membership";
 
-export default async function AccountPage() {
+/** Soft-fail notes for /api/stripe/portal bounce-backs. */
+const PORTAL_NOTES: Record<string, string> = {
+  no_email:
+    "We could not read a verified email on your account, so the billing portal did not open. Verify your email in Clerk, or write hello@ifn.community and we will sort it out.",
+  no_customer:
+    "We could not find a Stripe customer for this email, so the billing portal did not open. If you paid with a different email, write hello@ifn.community.",
+};
+
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ portal?: string | string[] }>;
+}) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  const { portal } = await searchParams;
+  const portalKey = Array.isArray(portal) ? portal[0] : portal;
+  const portalNote = portalKey ? PORTAL_NOTES[portalKey] : undefined;
 
   const email = await getVerifiedPrimaryEmail();
   const entitlement = email
@@ -33,6 +49,12 @@ export default async function AccountPage() {
           access.
         </p>
       </div>
+
+      {portalNote ? (
+        <p className="rounded-xl border border-[var(--crimson)]/30 bg-white p-4 text-sm text-[var(--ink-muted)] leading-relaxed">
+          {portalNote}
+        </p>
+      ) : null}
 
       <section className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-6 shadow-sm space-y-4">
         <div>

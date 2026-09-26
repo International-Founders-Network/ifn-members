@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-/** Verified primary email from Clerk, or null (soft-fail — never invent). */
+/** Verified primary email from Clerk, or null (soft-fail, never invent). */
 export async function getVerifiedPrimaryEmail(): Promise<string | null> {
   const user = await currentUser();
   if (!user) return null;
@@ -11,8 +11,10 @@ export async function getVerifiedPrimaryEmail(): Promise<string | null> {
 
   if (!primary?.emailAddress) return null;
 
-  const status = primary.verification?.status;
-  if (status === "unverified") return null;
+  // Clerk status is one of unverified | verified | transferable | failed |
+  // expired, and verification itself can be null. Only "verified" may claim a
+  // paid membership, so allow-list instead of deny-listing "unverified".
+  if (primary.verification?.status !== "verified") return null;
 
   return primary.emailAddress;
 }

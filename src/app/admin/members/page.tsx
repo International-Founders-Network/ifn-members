@@ -73,7 +73,7 @@ export default async function ViewMembersPage() {
                     key={row.id}
                     className="border-b border-[var(--ink-muted)]/10 last:border-0"
                   >
-                    <td className="px-3 py-2">{row.email ?? "—"}</td>
+                    <td className="px-3 py-2">{row.email ?? "not set"}</td>
                     <td className="px-3 py-2">{row.status}</td>
                     <td className="px-3 py-2">
                       {fmt(toIso(row.current_period_end))}
@@ -97,7 +97,7 @@ export default async function ViewMembersPage() {
 }
 
 function fmt(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleString("en-US", {
     timeZone: "America/Chicago",
     year: "numeric",

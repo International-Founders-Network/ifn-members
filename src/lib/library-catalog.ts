@@ -6,7 +6,7 @@ export type LibraryItem = {
   objectKey: string;
 };
 
-/** Pack A — hardcoded catalog (no CMS). */
+/** Pack A: hardcoded catalog (no CMS). */
 export const PACK_A: LibraryItem[] = [
   {
     slug: "visa-pathways",
