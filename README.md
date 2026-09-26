@@ -13,11 +13,12 @@ Thin member app for [International Founders Network](https://ifn.community) at *
 | --- | --- |
 | `/sign-in`, `/sign-up` | Clerk |
 | `/` | Plan status, Library CTA, or Become a member |
-| `/library` | Pack A downloads (signed URLs when entitled) |
+| `/library` | Pack A list; Download PDF only when entitled **and** Admin enabled download for that file |
 | `/account` | Email, plan, Stripe Customer Portal, Sign out |
 | `/admin/members` | Full Neon roster — Clerk `publicMetadata.role === "admin"` only |
+| `/admin/library` | Per-PDF `downloadable` toggle (Neon `library_assets`) — same admin role |
 
-Landing Google `/admin` is unchanged and does **not** show this roster.
+Landing Google `/admin` is unchanged and does **not** show this roster or Library toggles.
 
 ## Admin role
 
@@ -85,10 +86,16 @@ Object keys (private R2/S3):
 - `pack-a/entity-selection.pdf`
 - `pack-a/austin-ecosystem-map.pdf`
 
-Without R2 env, `/api/library/[slug]/download` returns **503** with a clear config reason after entitlement passes.
+### Download gate (Admin)
+
+Neon table `library_assets` stores per-slug `downloadable` (default **false** / missing row = off). Admin toggles at `/admin/library`. Toggle save does **not** require the PDF on R2.
+
+Member Library shows a disabled “Download unavailable” state when the flag is off. `/api/library/[slug]/download` returns **403** `{ reason: "download_disabled" }` if hit anyway (after entitlement checks).
+
+Without R2 env, the same route returns **503** with a clear config reason after entitlement **and** downloadable pass.
 
 ## Stack notes
 
 - Next.js App Router + TypeScript + Tailwind
 - `src/proxy.ts` = Clerk `clerkMiddleware` (Next.js 16 Proxy convention)
-- Shared Neon table `memberships` — no new events store / no migrations from this app
+- Shared Neon: `memberships` (landing webhooks) + members-owned `library_assets` (download gates; `CREATE TABLE IF NOT EXISTS` on first use; see `db/migrations/01_library_assets.sql`)
