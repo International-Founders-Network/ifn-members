@@ -4,8 +4,9 @@ import { buildPublicLibraryCatalog } from "@/lib/library-flags";
 import { publicCorsHeaders } from "@/lib/public-cors";
 
 /**
- * Public Pack A catalog for landing: per-asset member-on / teaser-on flags and
- * object keys. No auth, no signed URLs, no secrets. Missing row / DB error ⇒ both off.
+ * Public Pack A catalog for landing: title, description, member-on / teaser-on /
+ * landing-full flags and object keys. No auth, no signed URLs, no secrets.
+ * Missing row / DB error ⇒ all off. Downloads go through `./[slug]/teaser` and `./[slug]/full`.
  */
 export async function GET(req: Request) {
   const flags = await getLibraryAssetFlags();

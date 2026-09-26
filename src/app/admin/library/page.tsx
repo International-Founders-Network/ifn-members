@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LibraryDownloadToggles } from "@/components/admin/library-download-toggles";
+import { LibraryAdmin } from "@/components/admin/library-admin";
 import { isClerkAdmin } from "@/lib/auth-helpers";
 import { listLibraryAssetsForAdmin } from "@/lib/library-assets";
 
@@ -45,18 +45,38 @@ export default async function AdminLibraryPage() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>
         <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
-          Two independent per-file flags for Pack A, both{" "}
-          <strong>off</strong> by default. <strong>Member download</strong> lets
-          entitled members download the full PDF here.{" "}
-          <strong>Public teaser</strong> lets the landing site offer a teaser
-          only — it never unlocks the full PDF. Off always wins for that surface.
+          Three independent per-file flags for Pack A, all <strong>off</strong>{" "}
+          by default (a file with no saved row is fully off). Off always wins for
+          that surface.
         </p>
-        <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
-          Teaser files are parked until Content publishes them to{" "}
-          <code className="text-sm">pack-a/teasers/</code> and landing consumes{" "}
-          <code className="text-sm">/api/public/library</code>. Toggles work even
-          if the object is not on R2 yet — nothing downloads until the flag is on
-          and storage serves the file.
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-[var(--ink-muted)] leading-relaxed">
+          <li>
+            <strong className="text-[var(--ink)]">Approve public</strong> is the
+            primary action: it turns <strong>Public teaser</strong> ON
+            automatically. You can switch the teaser off afterward.
+          </li>
+          <li>
+            <strong className="text-[var(--ink)]">Public teaser</strong>: landing
+            may offer the teaser only. It never unlocks the full PDF.
+          </li>
+          <li>
+            <strong className="text-[var(--ink)]">Member download</strong>:
+            entitled members download the full PDF here.
+          </li>
+          <li>
+            <strong className="text-[var(--ink)]">Landing full download</strong>:
+            anyone on ifn.community may download the full PDF, no sign-in.
+          </li>
+        </ul>
+        <p className="mt-3 text-[var(--ink-muted)] leading-relaxed">
+          Use <strong>Preview full PDF</strong> and <strong>Preview teaser PDF</strong>{" "}
+          to review a file before switching anything on; previews ignore the flags
+          and open a 5-minute signed link. Teasers live at{" "}
+          <code className="text-sm">pack-a/teasers/&lt;slug&gt;.pdf</code>. Flags
+          save even if the object is not on R2 yet; nothing downloads until the
+          flag is on and storage serves the file. This page is the only Library
+          source of truth; landing has no Library Admin and reads{" "}
+          <code className="text-sm">/api/public/library</code>.
         </p>
       </div>
 
@@ -72,7 +92,7 @@ export default async function AdminLibraryPage() {
           {error}
         </p>
       ) : (
-        <LibraryDownloadToggles items={items} />
+        <LibraryAdmin items={items} />
       )}
     </div>
   );

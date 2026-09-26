@@ -7,6 +7,10 @@ import { parseLibraryFlagsPatch } from "@/lib/library-flags";
 
 type Params = { params: Promise<{ slug: string }> };
 
+/**
+ * Admin flag save. `{ downloadable?, teaserPublic?, landingFull?, approvePublic? }`.
+ * `approvePublic: true` forces the Public teaser on. Omitted flags keep their value.
+ */
 export async function PATCH(req: Request, { params }: Params) {
   const { userId } = await auth();
   if (!userId) {
@@ -34,7 +38,7 @@ export async function PATCH(req: Request, { params }: Params) {
     return NextResponse.json(
       {
         error:
-          "Body must include boolean downloadable and/or boolean teaserPublic",
+          "Body must include at least one boolean of downloadable, teaserPublic, landingFull, or approvePublic: true (approvePublic cannot be combined with teaserPublic: false)",
       },
       { status: 400 },
     );
@@ -52,6 +56,7 @@ export async function PATCH(req: Request, { params }: Params) {
       slug: row.slug,
       downloadable: Boolean(row.downloadable),
       teaserPublic: Boolean(row.teaser_public),
+      landingFull: Boolean(row.landing_full),
       updated_at: row.updated_at,
       updated_by: row.updated_by,
     });

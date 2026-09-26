@@ -4,8 +4,13 @@ Shared Neon project with the landing site (`memberships` and other landing table
 
 ## Members-owned tables
 
-- `library_assets` — per-slug Pack A download gate (`downloadable`, default `false`).
-  See `migrations/01_library_assets.sql`. The members app also ensures the table
-  exists on first Admin Library / download check (`CREATE TABLE IF NOT EXISTS`).
+- `library_assets` — per-slug Pack A surface flags, all default `false`
+  (missing row = all off):
+  - `downloadable` — member full download (`01_library_assets.sql`)
+  - `teaser_public` — landing teaser download (`02_library_assets_teaser_public.sql`)
+  - `landing_full` — landing full download (`03_library_assets_landing_full.sql`)
+
+  The members app also ensures the table and columns exist on first Admin Library /
+  download check (`CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS`).
 
 Toggle values do **not** require the PDF to exist on R2.
