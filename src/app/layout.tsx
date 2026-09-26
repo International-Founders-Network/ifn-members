@@ -1,0 +1,51 @@
+import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
+import { isClerkAdmin } from "@/lib/auth-helpers";
+import "./globals.css";
+
+export const dynamic = "force-dynamic";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "IFN Members",
+  description: "International Founders Network member home, library, and account.",
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const admin = await isClerkAdmin();
+
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-[var(--paper)] text-[var(--ink)]">
+        <ClerkProvider>
+          <SiteHeader isAdmin={admin} />
+          <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>
+          <footer className="border-t border-[var(--ink-muted)]/15 py-6 text-center text-xs text-[var(--ink-muted)]">
+            International Founders Network ·{" "}
+            <a href="https://ifn.community" className="hover:text-[var(--crimson)]">
+              ifn.community
+            </a>
+          </footer>
+        </ClerkProvider>
+      </body>
+    </html>
+  );
+}
