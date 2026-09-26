@@ -45,10 +45,18 @@ export default async function AdminLibraryPage() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>
         <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
-          Per-file download gate for Pack A. Default is{" "}
-          <strong>off</strong> until you enable a PDF. Toggle works even if the
-          object is not on R2 yet — members still cannot download until both the
-          flag is on and storage serves the file.
+          Two independent per-file flags for Pack A, both{" "}
+          <strong>off</strong> by default. <strong>Member download</strong> lets
+          entitled members download the full PDF here.{" "}
+          <strong>Public teaser</strong> lets the landing site offer a teaser
+          only — it never unlocks the full PDF. Off always wins for that surface.
+        </p>
+        <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
+          Teaser files are parked until Content publishes them to{" "}
+          <code className="text-sm">pack-a/teasers/</code> and landing consumes{" "}
+          <code className="text-sm">/api/public/library</code>. Toggles work even
+          if the object is not on R2 yet — nothing downloads until the flag is on
+          and storage serves the file.
         </p>
       </div>
 

@@ -2,13 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { LibraryFlagsPatch } from "@/lib/library-flags";
 
 export type AdminLibraryItem = {
   slug: string;
   title: string;
   description: string;
   objectKey: string;
+  /** Member on */
   downloadable: boolean;
+  /** Teaser on */
+  teaserPublic: boolean;
   updated_at: string | null;
   updated_by: string | null;
 };
@@ -31,18 +35,19 @@ export function LibraryDownloadToggles({ items }: { items: AdminLibraryItem[] })
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function toggle(slug: string, next: boolean) {
+  async function save(slug: string, patch: LibraryFlagsPatch) {
     setPending(slug);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/library/${slug}/downloadable`, {
+      const res = await fetch(`/api/admin/library/${slug}/flags`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ downloadable: next }),
+        body: JSON.stringify(patch),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         downloadable?: boolean;
+        teaserPublic?: boolean;
         updated_at?: string | null;
         updated_by?: string | null;
       };
@@ -56,6 +61,7 @@ export function LibraryDownloadToggles({ items }: { items: AdminLibraryItem[] })
             ? {
                 ...row,
                 downloadable: Boolean(data.downloadable),
+                teaserPublic: Boolean(data.teaserPublic),
                 updated_at: data.updated_at ?? row.updated_at,
                 updated_by: data.updated_by ?? row.updated_by,
               }
@@ -101,18 +107,34 @@ export function LibraryDownloadToggles({ items }: { items: AdminLibraryItem[] })
                     <span className="ml-1">(CT)</span>
                   </p>
                 </div>
-                <label className="flex cursor-pointer items-center gap-3 rounded-full border border-[var(--ink-muted)]/20 px-4 py-2 text-sm">
-                  <span className="text-[var(--ink-muted)]">
-                    {item.downloadable ? "Downloadable" : "Download off"}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-[var(--crimson)]"
-                    checked={item.downloadable}
-                    disabled={busy}
-                    onChange={(e) => void toggle(item.slug, e.target.checked)}
-                  />
-                </label>
+                <div className="flex flex-col gap-2">
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-full border border-[var(--ink-muted)]/20 px-4 py-2 text-sm">
+                    <span className="text-[var(--ink-muted)]">
+                      {item.downloadable ? "Member download" : "Member download off"}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[var(--crimson)]"
+                      checked={item.downloadable}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void save(item.slug, { downloadable: e.target.checked })
+                      }
+                    />
+                  </label>
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-full border border-[var(--ink-muted)]/20 px-4 py-2 text-sm">
+                    <span className="text-[var(--ink-muted)]">Public teaser</span>
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[var(--crimson)]"
+                      checked={item.teaserPublic}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void save(item.slug, { teaserPublic: e.target.checked })
+                      }
+                    />
+                  </label>
+                </div>
               </div>
             </li>
           );
