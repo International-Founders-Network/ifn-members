@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isClerkAdmin } from "@/lib/auth-helpers";
 import { listMemberships } from "@/lib/membership";
@@ -37,7 +38,14 @@ export default async function ViewMembersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">View Members</h1>
+        <p className="text-sm text-[var(--ink-muted)]">
+          View Members
+          {" · "}
+          <Link href="/admin/library" className="hover:text-[var(--crimson)]">
+            Library Admin
+          </Link>
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">View Members</h1>
         <p className="mt-2 text-[var(--ink-muted)]">
           Roster from Neon <code className="text-sm">memberships</code> (Stripe
           webhooks on landing). Not the landing form inbox.

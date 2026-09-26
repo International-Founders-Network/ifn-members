@@ -19,9 +19,14 @@ export function SiteHeader({ isAdmin = false }: { isAdmin?: boolean }) {
               Account
             </Link>
             {isAdmin ? (
-              <Link href="/admin/members" className="hover:text-[var(--crimson)]">
-                View Members
-              </Link>
+              <>
+                <Link href="/admin/members" className="hover:text-[var(--crimson)]">
+                  View Members
+                </Link>
+                <Link href="/admin/library" className="hover:text-[var(--crimson)]">
+                  Library Admin
+                </Link>
+              </>
             ) : null}
             <UserButton />
           </Show>

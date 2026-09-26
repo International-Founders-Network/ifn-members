@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
+import { isLibraryItemDownloadable } from "@/lib/library-assets";
 import { getLibraryItem } from "@/lib/library-catalog";
 import { isMemberEntitled } from "@/lib/membership";
 import { createSignedDownloadUrl } from "@/lib/storage";
@@ -39,6 +40,17 @@ export async function GET(_req: Request, { params }: Params) {
             ? "Membership past due; grace ended. Update billing from Account."
             : "Membership required for downloads. Become a member at ifn.community/membership or contact hello@ifn.community.",
         reason: entitlement.reason ?? "membership_not_active",
+      },
+      { status: 403 },
+    );
+  }
+
+  const downloadable = await isLibraryItemDownloadable(item.slug);
+  if (!downloadable) {
+    return NextResponse.json(
+      {
+        error: "Download is not enabled for this file yet.",
+        reason: "download_disabled",
       },
       { status: 403 },
     );
