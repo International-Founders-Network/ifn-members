@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { isClerkAdmin } from "@/lib/auth-helpers";
 import { getLibraryItem } from "@/lib/library-catalog";
-import { setLibraryItemDownloadable } from "@/lib/library-assets";
+import { setLibraryItemFlags } from "@/lib/library-assets";
+import { parseLibraryFlagsPatch } from "@/lib/library-flags";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -28,17 +29,13 @@ export async function PATCH(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const downloadable =
-    typeof body === "object" &&
-    body !== null &&
-    "downloadable" in body &&
-    typeof (body as { downloadable: unknown }).downloadable === "boolean"
-      ? (body as { downloadable: boolean }).downloadable
-      : null;
-
-  if (downloadable === null) {
+  const patch = parseLibraryFlagsPatch(body);
+  if (!patch) {
     return NextResponse.json(
-      { error: "Body must include boolean downloadable" },
+      {
+        error:
+          "Body must include boolean downloadable and/or boolean teaserPublic",
+      },
       { status: 400 },
     );
   }
@@ -50,10 +47,11 @@ export async function PATCH(req: Request, { params }: Params) {
     userId;
 
   try {
-    const row = await setLibraryItemDownloadable(slug, downloadable, updatedBy);
+    const row = await setLibraryItemFlags(slug, patch, updatedBy);
     return NextResponse.json({
       slug: row.slug,
       downloadable: Boolean(row.downloadable),
+      teaserPublic: Boolean(row.teaser_public),
       updated_at: row.updated_at,
       updated_by: row.updated_by,
     });
@@ -65,7 +63,7 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
     console.error(
-      "setLibraryItemDownloadable failed:",
+      "setLibraryItemFlags failed:",
       e instanceof Error ? e.message : "unknown error",
     );
     return NextResponse.json({ error: "Could not save toggle" }, { status: 500 });

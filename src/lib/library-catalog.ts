@@ -31,3 +31,11 @@ export const PACK_A: LibraryItem[] = [
 export function getLibraryItem(slug: string): LibraryItem | undefined {
   return PACK_A.find((item) => item.slug === slug);
 }
+
+/**
+ * Teaser object key (parked: Content publishes teasers later; not served by this app).
+ * Full PDFs stay at `pack-a/<slug>.pdf`.
+ */
+export function teaserObjectKey(slug: string): string {
+  return `pack-a/teasers/${slug}.pdf`;
+}

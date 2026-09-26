@@ -1,9 +1,19 @@
 import { getSql } from "@/lib/db";
 import { PACK_A } from "@/lib/library-catalog";
+import {
+  defaultLibraryFlagsMap,
+  type LibraryAssetFlags,
+  type LibraryFlagsPatch,
+} from "@/lib/library-flags";
 
+/**
+ * `downloadable` = "member on" (column name kept from PR #1).
+ * `teaser_public` = "teaser on" (landing teaser only; never unlocks the full PDF).
+ */
 export type LibraryAssetRow = {
   slug: string;
   downloadable: boolean;
+  teaser_public: boolean;
   updated_at: string | null;
   updated_by: string | null;
 };
@@ -11,8 +21,9 @@ export type LibraryAssetRow = {
 let ensured = false;
 
 /**
- * Ensure library_assets exists (idempotent). Safe to call often.
- * Missing row for a catalog slug means downloadable = false (default OFF).
+ * Ensure library_assets exists with all columns (idempotent). Safe to call often.
+ * The ALTER covers DBs created by PR #1 before teaser_public existed.
+ * Missing row for a catalog slug means both flags off.
  */
 export async function ensureLibraryAssetsTable(): Promise<void> {
   if (ensured) return;
@@ -23,9 +34,14 @@ export async function ensureLibraryAssetsTable(): Promise<void> {
     CREATE TABLE IF NOT EXISTS library_assets (
       slug TEXT PRIMARY KEY,
       downloadable BOOLEAN NOT NULL DEFAULT FALSE,
+      teaser_public BOOLEAN NOT NULL DEFAULT FALSE,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_by TEXT
     )
+  `;
+  await sql`
+    ALTER TABLE library_assets
+      ADD COLUMN IF NOT EXISTS teaser_public BOOLEAN NOT NULL DEFAULT FALSE
   `;
   ensured = true;
 }
@@ -35,40 +51,52 @@ export function resetLibraryAssetsEnsureFlag(): void {
   ensured = false;
 }
 
-/**
- * Whether a catalog slug may be downloaded.
- * Default OFF when no row / DB missing / lookup fails (fail closed for downloads).
- */
-export async function isLibraryItemDownloadable(slug: string): Promise<boolean> {
+async function lookupFlag(
+  slug: string,
+  column: "downloadable" | "teaser_public",
+): Promise<boolean> {
   const sql = getSql();
   if (!sql) return false;
 
   try {
     await ensureLibraryAssetsTable();
     const rows = (await sql`
-      SELECT downloadable
+      SELECT downloadable, teaser_public
       FROM library_assets
       WHERE slug = ${slug}
       LIMIT 1
-    `) as Array<{ downloadable: boolean }>;
+    `) as Array<Pick<LibraryAssetRow, "downloadable" | "teaser_public">>;
 
     if (rows.length === 0) return false;
-    return Boolean(rows[0].downloadable);
+    return Boolean(rows[0][column]);
   } catch (error) {
     console.error(
-      "library_assets downloadable lookup failed:",
+      `library_assets ${column} lookup failed:`,
       error instanceof Error ? error.message : "unknown error",
     );
     return false;
   }
 }
 
-/** Map of slug → downloadable for all Pack A items (missing = false). */
-export async function getLibraryDownloadFlags(): Promise<Record<string, boolean>> {
-  const flags: Record<string, boolean> = {};
-  for (const item of PACK_A) {
-    flags[item.slug] = false;
-  }
+/**
+ * Member on: whether entitled members may download the full PDF.
+ * Default OFF when no row / DB missing / lookup fails (fail closed).
+ */
+export async function isLibraryItemDownloadable(slug: string): Promise<boolean> {
+  return lookupFlag(slug, "downloadable");
+}
+
+/**
+ * Teaser on: whether landing may offer the teaser. Fail closed.
+ * Does not grant member full-PDF access.
+ */
+export async function isLibraryItemTeaserPublic(slug: string): Promise<boolean> {
+  return lookupFlag(slug, "teaser_public");
+}
+
+/** Map of slug → { downloadable, teaserPublic } for all Pack A items (missing = both off). */
+export async function getLibraryAssetFlags(): Promise<Record<string, LibraryAssetFlags>> {
+  const flags = defaultLibraryFlagsMap();
 
   const sql = getSql();
   if (!sql) return flags;
@@ -76,13 +104,16 @@ export async function getLibraryDownloadFlags(): Promise<Record<string, boolean>
   try {
     await ensureLibraryAssetsTable();
     const rows = (await sql`
-      SELECT slug, downloadable
+      SELECT slug, downloadable, teaser_public
       FROM library_assets
-    `) as Array<{ slug: string; downloadable: boolean }>;
+    `) as Array<Pick<LibraryAssetRow, "slug" | "downloadable" | "teaser_public">>;
 
     for (const row of rows) {
       if (row.slug in flags) {
-        flags[row.slug] = Boolean(row.downloadable);
+        flags[row.slug] = {
+          downloadable: Boolean(row.downloadable),
+          teaserPublic: Boolean(row.teaser_public),
+        };
       }
     }
   } catch (error) {
@@ -102,6 +133,7 @@ export async function listLibraryAssetsForAdmin(): Promise<
     description: string;
     objectKey: string;
     downloadable: boolean;
+    teaserPublic: boolean;
     updated_at: string | null;
     updated_by: string | null;
   }>
@@ -112,7 +144,7 @@ export async function listLibraryAssetsForAdmin(): Promise<
   if (sql) {
     await ensureLibraryAssetsTable();
     const rows = (await sql`
-      SELECT slug, downloadable, updated_at, updated_by
+      SELECT slug, downloadable, teaser_public, updated_at, updated_by
       FROM library_assets
     `) as LibraryAssetRow[];
     for (const row of rows) {
@@ -128,6 +160,7 @@ export async function listLibraryAssetsForAdmin(): Promise<
       description: item.description,
       objectKey: item.objectKey,
       downloadable: row ? Boolean(row.downloadable) : false,
+      teaserPublic: row ? Boolean(row.teaser_public) : false,
       updated_at: row?.updated_at ?? null,
       updated_by: row?.updated_by ?? null,
     };
@@ -135,11 +168,12 @@ export async function listLibraryAssetsForAdmin(): Promise<
 }
 
 /**
- * Upsert downloadable flag. Does not touch R2; PDF need not exist.
+ * Upsert member-on and/or teaser-on. Omitted flags keep their stored value
+ * (or default FALSE on first insert). Does not touch R2; PDFs need not exist.
  */
-export async function setLibraryItemDownloadable(
+export async function setLibraryItemFlags(
   slug: string,
-  downloadable: boolean,
+  patch: LibraryFlagsPatch,
   updatedBy: string | null,
 ): Promise<LibraryAssetRow> {
   const sql = getSql();
@@ -151,16 +185,30 @@ export async function setLibraryItemDownloadable(
     throw new Error("unknown_slug");
   }
 
+  if (patch.downloadable === undefined && patch.teaserPublic === undefined) {
+    throw new Error("empty_patch");
+  }
+
   await ensureLibraryAssetsTable();
 
+  const downloadable = patch.downloadable ?? null;
+  const teaserPublic = patch.teaserPublic ?? null;
+
   const rows = (await sql`
-    INSERT INTO library_assets (slug, downloadable, updated_at, updated_by)
-    VALUES (${slug}, ${downloadable}, NOW(), ${updatedBy})
+    INSERT INTO library_assets (slug, downloadable, teaser_public, updated_at, updated_by)
+    VALUES (
+      ${slug},
+      COALESCE(${downloadable}::boolean, FALSE),
+      COALESCE(${teaserPublic}::boolean, FALSE),
+      NOW(),
+      ${updatedBy}
+    )
     ON CONFLICT (slug) DO UPDATE SET
-      downloadable = EXCLUDED.downloadable,
+      downloadable = COALESCE(${downloadable}::boolean, library_assets.downloadable),
+      teaser_public = COALESCE(${teaserPublic}::boolean, library_assets.teaser_public),
       updated_at = NOW(),
       updated_by = EXCLUDED.updated_by
-    RETURNING slug, downloadable, updated_at, updated_by
+    RETURNING slug, downloadable, teaser_public, updated_at, updated_by
   `) as LibraryAssetRow[];
 
   return rows[0];

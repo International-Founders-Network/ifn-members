@@ -13,12 +13,13 @@ Thin member app for [International Founders Network](https://ifn.community) at *
 | --- | --- |
 | `/sign-in`, `/sign-up` | Clerk |
 | `/` | Plan status, Library CTA, or Become a member |
-| `/library` | Pack A list; Download PDF only when entitled **and** Admin enabled download for that file |
+| `/library` | Pack A list; Download PDF only when entitled **and** Admin turned on **Member download** for that file |
 | `/account` | Email, plan, Stripe Customer Portal, Sign out |
 | `/admin/members` | Full Neon roster — Clerk `publicMetadata.role === "admin"` only |
-| `/admin/library` | Per-PDF `downloadable` toggle (Neon `library_assets`) — same admin role |
+| `/admin/library` | Per-PDF **Member download** + **Public teaser** toggles (Neon `library_assets`) — same admin role. Only Library SoT |
+| `/api/public/library` | Public JSON catalog (flags + object keys, no auth, no secrets) for landing |
 
-Landing Google `/admin` is unchanged and does **not** show this roster or Library toggles.
+Landing Google `/admin` is unchanged and does **not** show this roster or Library toggles. Members `/admin/library` is the single source of truth for Pack A flags.
 
 ## Admin role
 
@@ -86,16 +87,44 @@ Object keys (private R2/S3):
 - `pack-a/entity-selection.pdf`
 - `pack-a/austin-ecosystem-map.pdf`
 
-### Download gate (Admin)
+Teaser objects (parked — not published by this app yet): `pack-a/teasers/<slug>.pdf`.
 
-Neon table `library_assets` stores per-slug `downloadable` (default **false** / missing row = off). Admin toggles at `/admin/library`. Toggle save does **not** require the PDF on R2.
+### Asset flags (Admin)
 
-Member Library shows a disabled “Download unavailable” state when the flag is off. `/api/library/[slug]/download` returns **403** `{ reason: "download_disabled" }` if hit anyway (after entitlement checks).
+Neon table `library_assets` stores two independent per-slug flags, both default **false** (missing row = both off). Off always wins for that surface.
 
-Without R2 env, the same route returns **503** with a clear config reason after entitlement **and** downloadable pass.
+| Admin label | Column | Surface |
+| --- | --- | --- |
+| **Member download** / **Member download off** | `downloadable` | Entitled members download the full PDF on members.ifn.community |
+| **Public teaser** | `teaser_public` | Landing may offer the teaser only (landing consumer ships separately) |
+
+`teaser_public` never unlocks the member full PDF. Toggles at `/admin/library` save via `PATCH /api/admin/library/[slug]/flags` with `{ downloadable?: boolean, teaserPublic?: boolean }` (at least one); omitted flags keep their stored value. Toggle save does **not** require the PDF on R2.
+
+Member Library shows a disabled “Download unavailable” state when Member download is off. `/api/library/[slug]/download` returns **403** `{ reason: "download_disabled" }` if hit anyway (after entitlement checks).
+
+Without R2 env, the same route returns **503** with a clear config reason after entitlement **and** Member download pass.
+
+### Public catalog
+
+`GET /api/public/library` — no auth, flags + object keys only (no signed URLs, no secrets). CORS allows `https://ifn.community`, `https://www.ifn.community`, and `http://localhost:*`; `Cache-Control: public, max-age=60, s-maxage=60`.
+
+```json
+{
+  "assets": [
+    {
+      "id": "visa-pathways",
+      "title": "Visa pathways",
+      "memberDownloadable": false,
+      "teaserPublic": false,
+      "fullObjectKey": "pack-a/visa-pathways.pdf",
+      "teaserObjectKey": "pack-a/teasers/visa-pathways.pdf"
+    }
+  ]
+}
+```
 
 ## Stack notes
 
 - Next.js App Router + TypeScript + Tailwind
 - `src/proxy.ts` = Clerk `clerkMiddleware` (Next.js 16 Proxy convention)
-- Shared Neon: `memberships` (landing webhooks) + members-owned `library_assets` (download gates; `CREATE TABLE IF NOT EXISTS` on first use; see `db/migrations/01_library_assets.sql`)
+- Shared Neon: `memberships` (landing webhooks) + members-owned `library_assets` (member-on + teaser-on flags; `CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS` on first use; see `db/migrations/01_library_assets.sql`, `02_library_assets_teaser_public.sql`)

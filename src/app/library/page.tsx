@@ -2,8 +2,9 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
-import { getLibraryDownloadFlags } from "@/lib/library-assets";
+import { getLibraryAssetFlags } from "@/lib/library-assets";
 import { PACK_A } from "@/lib/library-catalog";
+import { defaultLibraryFlagsMap } from "@/lib/library-flags";
 import { isMemberEntitled } from "@/lib/membership";
 
 export default async function LibraryPage() {
@@ -15,9 +16,10 @@ export default async function LibraryPage() {
     ? await isMemberEntitled(email)
     : { entitled: false as const, reason: "no_email" as const };
 
-  const downloadFlags = entitlement.entitled
-    ? await getLibraryDownloadFlags()
-    : Object.fromEntries(PACK_A.map((item) => [item.slug, false]));
+  // Member on (`downloadable`) only; teaserPublic never unlocks the full PDF.
+  const assetFlags = entitlement.entitled
+    ? await getLibraryAssetFlags()
+    : defaultLibraryFlagsMap();
 
   return (
     <div className="space-y-8">
@@ -52,7 +54,7 @@ export default async function LibraryPage() {
       <ul className="space-y-4">
         {PACK_A.map((item) => {
           const canDownload =
-            entitlement.entitled && Boolean(downloadFlags[item.slug]);
+            entitlement.entitled && Boolean(assetFlags[item.slug]?.downloadable);
 
           return (
             <li
