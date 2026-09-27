@@ -21,7 +21,7 @@ import {
   ResultCount,
   SELECTION,
   TEXT_LINK,
-} from "@/components/library/resource-ui";
+} from "@ifn/ui";
 import type { AdminLibraryAsset } from "@/lib/library-assets";
 import {
   ADMIN_STATUS_FILTERS,

@@ -3,15 +3,15 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, Clock, Download, Lock } from "lucide-react";
 import {
-  FilterChips,
-  LibrarySearch,
   NoMatch,
   PILL_NEUTRAL,
   PILL_ON,
   ResourceCard,
-  ResultCount,
+  ResourceCtaLink,
+  ResourceFilters,
+  STATUS_TEXT,
   TEXT_LINK,
-} from "@/components/library/resource-ui";
+} from "@ifn/ui";
 import { matchesLibraryQuery } from "@/lib/library-filter";
 
 export type MemberLibraryItem = {
@@ -62,24 +62,21 @@ export function MemberLibrary({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <LibrarySearch
-          id="library-search"
-          label="Search the library"
-          placeholder="Search Pack A guides"
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
-        {entitled ? (
-          <FilterChips
-            label="Filter by availability"
-            options={options}
-            value={filter}
-            onChange={setFilter}
-          />
-        ) : null}
-        <ResultCount shown={visible.length} isFiltered={isFiltered} noun="guide" />
-      </div>
+      <ResourceFilters
+        search={{
+          id: "library-search",
+          label: "Search the library",
+          placeholder: "Search Pack A guides",
+          value: searchQuery,
+          onChange: setSearchQuery,
+        }}
+        chips={
+          entitled
+            ? { label: "Filter by availability", options, value: filter, onChange: setFilter }
+            : undefined
+        }
+        count={{ shown: visible.length, isFiltered, noun: "guide" }}
+      />
 
       {visible.length === 0 ? (
         <NoMatch
@@ -115,18 +112,23 @@ export function MemberLibrary({
                   ) : null}
                 </>
               }
+              memberCta={
+                entitled && item.canDownload ? (
+                  <ResourceCtaLink
+                    href={`/api/library/${item.slug}/download`}
+                    icon={<Download size={16} aria-hidden="true" />}
+                  >
+                    Download PDF
+                  </ResourceCtaLink>
+                ) : null
+              }
               footer={
                 !entitled ? (
-                  <p className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--ink-muted)]">
+                  <p className={STATUS_TEXT}>
                     <Lock size={16} aria-hidden="true" />
                     Available after membership is linked.
                   </p>
-                ) : item.canDownload ? (
-                  <a href={`/api/library/${item.slug}/download`} className={TEXT_LINK}>
-                    Download PDF
-                    <Download size={16} aria-hidden="true" />
-                  </a>
-                ) : (
+                ) : !item.canDownload ? (
                   <div>
                     <p
                       aria-disabled="true"
@@ -139,7 +141,7 @@ export function MemberLibrary({
                       This file is not enabled for download yet.
                     </p>
                   </div>
-                )
+                ) : null
               }
             />
           ))}
