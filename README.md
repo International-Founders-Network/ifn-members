@@ -225,4 +225,4 @@ Unknown slug ⇒ 404 `unknown_slug`. Flag lookup failure ⇒ treated as off. Obj
 - Next.js App Router + TypeScript + Tailwind
 - `src/proxy.ts` = Clerk `clerkMiddleware` (Next.js 16 Proxy convention)
 - Shared Neon: `memberships` (landing webhooks) + members-owned `library_assets` (member-on, teaser-on and landing-full flags; `CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS` on first use; see `db/migrations/01_library_assets.sql`, `02_library_assets_teaser_public.sql`, `03_library_assets_landing_full.sql`)
-- Library UI reuses the landing `Resources.tsx` pattern (`src/components/library/resource-ui.tsx`): search, `aria-pressed` chips, icon-box cards, no-match state. Icons from `lucide-react`
+- Library UI comes from `@ifn/ui` (github:International-Founders-Network/ifn-ui, pinned by commit), the shared port of the landing `Resources.tsx` pattern: search, `aria-pressed` chips, icon-box cards, no-match state. Tailwind scans it via `@source` in `src/app/globals.css`. Icons from `lucide-react`

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../node_modules/@ifn/ui/dist";
 
 :root {
   --crimson: #a81b36;
