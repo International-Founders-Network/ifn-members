@@ -20,13 +20,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "IFN Members",
   description: "International Founders Network member home, library, and account.",
-  icons: {
-    icon: [
-      { url: "/icon.png", type: "image/png", sizes: "32x32" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
-  },
+  // Icons come ONLY from the App Router file convention:
+  //   src/app/favicon.ico, src/app/icon.png, src/app/apple-icon.png
+  // Declaring metadata.icons as well produced dual <link rel="icon"> tags
+  // (hashed file-convention URL + bare /favicon.ico), which raced in some
+  // browsers and contributed to globe ↔ period-mark flicker after the swap.
 };
 
 export default async function RootLayout({
