@@ -406,28 +406,54 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                 }
                 footer={
                   <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-x-6">
-                      <a
-                        href={`${previewBase}?kind=full`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={TEXT_LINK}
-                      >
-                        {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
-                        <ExternalLink size={16} aria-hidden="true" />
-                        <span className="sr-only">(opens in a new tab)</span>
-                      </a>
+                    <div className="flex flex-wrap gap-x-6 gap-y-2">
+                      {item.objectKey ? (
+                        <>
+                          <a
+                            href={`${previewBase}?kind=full`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={TEXT_LINK}
+                          >
+                            {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
+                            <ExternalLink size={16} aria-hidden="true" />
+                            <span className="sr-only">(opens inline in a new tab)</span>
+                          </a>
+                          <a
+                            href={`${previewBase}?kind=full&disposition=attachment`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={TEXT_LINK}
+                          >
+                            {item.kind === "xlsx" ? "Download workbook" : "Download full PDF"}
+                            <ExternalLink size={16} aria-hidden="true" />
+                            <span className="sr-only">(downloads file)</span>
+                          </a>
+                        </>
+                      ) : null}
                       {item.teaserObjectKey ? (
-                        <a
-                          href={`${previewBase}?kind=teaser`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={TEXT_LINK}
-                        >
-                          Preview teaser PDF
-                          <ExternalLink size={16} aria-hidden="true" />
-                          <span className="sr-only">(opens in a new tab)</span>
-                        </a>
+                        <>
+                          <a
+                            href={`${previewBase}?kind=teaser`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={TEXT_LINK}
+                          >
+                            Preview teaser PDF
+                            <ExternalLink size={16} aria-hidden="true" />
+                            <span className="sr-only">(opens inline in a new tab)</span>
+                          </a>
+                          <a
+                            href={`${previewBase}?kind=teaser&disposition=attachment`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={TEXT_LINK}
+                          >
+                            Download teaser PDF
+                            <ExternalLink size={16} aria-hidden="true" />
+                            <span className="sr-only">(downloads file)</span>
+                          </a>
+                        </>
                       ) : null}
                     </div>
                     <p className="font-mono text-xs text-[var(--ink-muted)]">

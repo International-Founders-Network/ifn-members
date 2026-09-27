@@ -80,15 +80,15 @@ export default async function AdminLibraryPage() {
           </li>
         </ul>
         <p className="mt-3 text-[var(--ink-muted)] leading-relaxed">
-          Use <strong>Preview full PDF</strong> and <strong>Preview teaser PDF</strong>{" "}
-          to review a file before switching anything on; previews ignore the flags
-          and open a 5-minute signed link. Member file and teaser share one serial
-          folder:{" "}
+          When an object is on R2, use <strong>Preview</strong> (opens the PDF
+          inline in a new tab) or <strong>Download</strong> (saves the file). Both
+          ignore the surface flags and use a 5-minute signed link. Member file and
+          teaser share one serial folder:{" "}
           <code className="text-sm">library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf</code>.
           Workbook-only assets have no teaser. Flags
-          save even if the object is not on R2 yet; nothing downloads until the
-          flag is on and storage serves the file. This page is the only Library
-          source of truth; landing has no Library Admin and reads{" "}
+          save even if the object is not on R2 yet; nothing reaches members or the
+          landing until the flag is on and storage serves the file. This page is the
+          only Library source of truth; landing has no Library Admin and reads{" "}
           <code className="text-sm">/api/public/library</code>.
         </p>
       </div>

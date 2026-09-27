@@ -7,9 +7,10 @@ import { createSignedUrlForExistingObject } from "@/lib/storage";
 type Params = { params: Promise<{ slug: string }> };
 
 /**
- * Admin review-in-place: `?kind=full|teaser` → 302 to a 5-minute signed R2 URL
+ * Admin review / download: `?kind=full|teaser` → 302 to a 5-minute signed R2 URL
  * (`full` is the workbook for xlsx-only assets; they have no teaser).
- * Ignores every surface flag (admins may always preview). Missing object ⇒ 403
+ * Optional `disposition=inline|attachment` (default `inline` so Preview opens in-tab;
+ * pass `attachment` for Download). Ignores every surface flag. Missing object ⇒ 403
  * `{ reason: "object_missing" }` naming the key.
  */
 export async function GET(req: Request, { params }: Params) {
@@ -36,6 +37,10 @@ export async function GET(req: Request, { params }: Params) {
     );
   }
 
+  const dispositionParam = new URL(req.url).searchParams.get("disposition");
+  const disposition =
+    dispositionParam === "attachment" ? "attachment" : "inline";
+
   const objectKey = kind === "full" ? item.objectKey : item.teaserObjectKey;
   if (!objectKey) {
     return NextResponse.json(
@@ -43,7 +48,9 @@ export async function GET(req: Request, { params }: Params) {
       { status: 403, headers: { "Cache-Control": "no-store" } },
     );
   }
-  const signed = await createSignedUrlForExistingObject(objectKey);
+  const signed = await createSignedUrlForExistingObject(objectKey, undefined, {
+    disposition,
+  });
   if (!signed.ok) {
     return NextResponse.json(
       { error: signed.error, reason: signed.reason },
