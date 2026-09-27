@@ -55,6 +55,13 @@ export async function GET(_req: Request, { params }: Params) {
     );
   }
 
+  if (!item.objectKey) {
+    return NextResponse.json(
+      { error: "This file is not on R2 yet.", reason: "object_missing" },
+      { status: 403 },
+    );
+  }
+
   const signed = await createSignedDownloadUrl(item.objectKey);
   if (!signed.ok) {
     return NextResponse.json(

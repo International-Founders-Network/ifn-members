@@ -5,6 +5,7 @@ import {
   listLibraryAssetsForAdmin,
   listLibraryCatalogWithFlags,
   resetLibraryAssetsEnsureFlag,
+  resolveLibraryItem,
   setLibraryItemsFlags,
   UnknownLibrarySlugError,
 } from "./library-assets";
@@ -27,6 +28,7 @@ import {
   parseLibraryBulkRequest,
   parseLibraryFlagsPatch,
 } from "./library-flags";
+import { LIBRARY_SERIALS } from "./library-serials";
 
 vi.mock("@/lib/db", () => ({ getSql: vi.fn(() => null) }));
 
@@ -111,22 +113,41 @@ function useFakeNeon(initial: FakeRow[] = []) {
   return fake;
 }
 
-/** R2 bucket listing with two pages, 4 new slugs beyond Pack A, one teaser-only. */
+/**
+ * R2 bucket listing with two pages: Pack A, one registry workbook, and 5 serial folders
+ * outside the registry (one teaser-only, one PDF + workbook, one workbook-only), plus
+ * legacy / off-scheme keys that discovery must ignore.
+ */
 const R2_KEYS_PAGE_1 = [
-  "pack-a/visa-pathways.pdf",
-  "pack-a/entity-selection.pdf",
-  "pack-a/austin-ecosystem-map.pdf",
-  "pack-a/teasers/visa-pathways.pdf",
-  "pack-a/cap-table-basics.pdf",
+  "library/001-visa-pathways/v1.1-member.pdf",
+  "library/001-visa-pathways/v1.1-teaser.pdf",
+  "library/002-entity-selection/v1.1-member.pdf",
+  "library/003-austin-ecosystem-map/v1.1-member.pdf",
+  "library/003-austin-ecosystem-map/v1.1-teaser.pdf",
+  "library/005-visa-pathways/v1.1-teaser.pdf", // wrong serial for a registry slug, ignored
+  "library/008-biz-plan-builder/v1.1.xlsx", // registry workbook
+  "library/109-cap-table-basics/v1.1-member.pdf",
 ];
 const R2_KEYS_PAGE_2 = [
-  "pack-a/banking-for-founders.pdf",
-  "pack-a/teasers/banking-for-founders.pdf",
-  "pack-a/teasers/hiring-in-texas.pdf", // teaser only
-  "pack-a/tax_calendar.pdf",
-  "pack-a/pricing-model.xlsx", // ignored until xlsx lands
-  "pack-a/drafts/unreleased.pdf", // nested folder, ignored
-  "pack-a/", // folder marker
+  "library/110-banking-for-founders/v1.1-member.pdf",
+  "library/110-banking-for-founders/v1.1-teaser.pdf",
+  "library/111-hiring-in-texas/v1.1-teaser.pdf", // teaser only
+  "library/112-tax_calendar/v1.1-member.pdf",
+  "library/112-tax_calendar/v1.1.xlsx", // PDF with a workbook
+  "library/113-pricing-model/v1.1.xlsx", // workbook only
+  "library/visa-pathways.pdf", // legacy flat key, ignored
+  "library/teasers/visa-pathways.pdf", // legacy teaser, ignored
+  "library/114-old-version/v1.0-member.pdf", // other version, ignored
+  "library/115-nested/drafts/v1.1-member.pdf", // deeper folder, ignored
+  "library/", // folder marker
+];
+
+const UNREGISTERED = [
+  "banking-for-founders",
+  "cap-table-basics",
+  "hiring-in-texas",
+  "pricing-model",
+  "tax_calendar",
 ];
 
 beforeEach(() => {
@@ -156,14 +177,49 @@ describe("slug + title helpers", () => {
     expect(isValidLibrarySlug(42)).toBe(false);
   });
 
-  it("keeps PACK_A copy as overrides and placeholders for unknown slugs", () => {
+  it("keeps PACK_A copy as overrides and placeholders for other slugs", () => {
     expect(libraryItemForSlug("visa-pathways")).toBe(PACK_A[0]);
-    expect(libraryItemForSlug("cap-table-basics")).toEqual({
-      slug: "cap-table-basics",
-      title: "Cap table basics",
+    // Registry PDF (004+): keys from the serial, placeholder copy.
+    expect(libraryItemForSlug("banking-setup")).toEqual({
+      slug: "banking-setup",
+      title: "Banking setup",
       description: DISCOVERED_DESCRIPTION,
       tag: "PDF",
-      objectKey: "pack-a/cap-table-basics.pdf",
+      nnn: "006",
+      kind: "pdf",
+      objectKey: "library/006-banking-setup/v1.1-member.pdf",
+      teaserObjectKey: "library/006-banking-setup/v1.1-teaser.pdf",
+      xlsxObjectKey: null,
+    });
+    // Registry workbook: the member deliverable is the xlsx; no teaser.
+    expect(libraryItemForSlug("biz-plan-builder")).toMatchObject({
+      tag: "Workbook",
+      nnn: "008",
+      kind: "xlsx",
+      objectKey: "library/008-biz-plan-builder/v1.1.xlsx",
+      teaserObjectKey: null,
+      xlsxObjectKey: "library/008-biz-plan-builder/v1.1.xlsx",
+    });
+    // Outside the registry: serial from discovery, or no keys at all.
+    expect(
+      libraryItemForSlug("cap-table-basics", {
+        full: true,
+        teaser: false,
+        xlsx: true,
+        nnn: "109",
+      }),
+    ).toMatchObject({
+      nnn: "109",
+      kind: "pdf",
+      objectKey: "library/109-cap-table-basics/v1.1-member.pdf",
+      teaserObjectKey: "library/109-cap-table-basics/v1.1-teaser.pdf",
+      xlsxObjectKey: "library/109-cap-table-basics/v1.1.xlsx",
+    });
+    expect(libraryItemForSlug("cap-table-basics")).toMatchObject({
+      nnn: null,
+      objectKey: null,
+      teaserObjectKey: null,
+      xlsxObjectKey: null,
     });
   });
 
@@ -180,30 +236,105 @@ describe("slug + title helpers", () => {
 });
 
 describe("R2 discovery", () => {
-  it("classifies full and teaser keys and ignores everything else", () => {
-    expect(classifyLibraryObjectKey("pack-a/visa-pathways.pdf")).toEqual({
+  it("classifies member, teaser and xlsx keys in serial folders", () => {
+    expect(classifyLibraryObjectKey("library/001-visa-pathways/v1.1-member.pdf")).toEqual({
       slug: "visa-pathways",
+      nnn: "001",
       kind: "full",
     });
-    expect(classifyLibraryObjectKey("pack-a/teasers/visa-pathways.pdf")).toEqual({
+    expect(classifyLibraryObjectKey("library/001-visa-pathways/v1.1-teaser.pdf")).toEqual({
       slug: "visa-pathways",
+      nnn: "001",
       kind: "teaser",
     });
-    expect(classifyLibraryObjectKey("pack-a/model.xlsx")).toBeNull();
-    expect(classifyLibraryObjectKey("pack-a/drafts/x.pdf")).toBeNull();
-    expect(classifyLibraryObjectKey("pack-a/Upper.PDF")).toBeNull();
-    expect(classifyLibraryObjectKey("pack-a/has space.pdf")).toBeNull();
-    expect(classifyLibraryObjectKey("pack-b/visa-pathways.pdf")).toBeNull();
+    expect(classifyLibraryObjectKey("library/008-biz-plan-builder/v1.1.xlsx")).toEqual({
+      slug: "biz-plan-builder",
+      nnn: "008",
+      kind: "xlsx",
+    });
+    // The slug keeps its own dashes; only the leading NNN- is the serial.
+    expect(
+      classifyLibraryObjectKey("library/104-transition-playbook/v1.1-member.pdf"),
+    ).toMatchObject({ slug: "transition-playbook", nnn: "104" });
   });
 
-  it("groups by slug and keeps teaser-only uploads", () => {
+  it("ignores legacy flat keys, other versions and off-scheme folders", () => {
+    for (const key of [
+      "pack-a/visa-pathways.pdf",
+      "pack-a/teasers/visa-pathways.pdf",
+      "library/visa-pathways.pdf",
+      "library/teasers/visa-pathways.pdf",
+      "library/biz-plan-builder.xlsx",
+      "library/001-visa-pathways/v1.0-member.pdf",
+      "library/001-visa-pathways/member.pdf",
+      "library/001-visa-pathways/v1.1-member.PDF",
+      "library/001-visa-pathways/v1.1.XLSX",
+      "library/001-visa-pathways/drafts/v1.1-member.pdf",
+      "library/01-visa-pathways/v1.1-member.pdf",
+      "library/1001-visa-pathways/v1.1-member.pdf",
+      "library/001-has space/v1.1-member.pdf",
+      "library/001--leading/v1.1-member.pdf",
+      "other/001-visa-pathways/v1.1-member.pdf",
+      "library/",
+    ]) {
+      expect(classifyLibraryObjectKey(key), key).toBeNull();
+    }
+  });
+
+  it("groups by slug with serial, keeps teaser- and workbook-only uploads", () => {
     const found = discoverFromObjectKeys([...R2_KEYS_PAGE_1, ...R2_KEYS_PAGE_2]);
-    expect(found.get("visa-pathways")).toEqual({ full: true, teaser: true });
-    expect(found.get("entity-selection")).toEqual({ full: true, teaser: false });
-    expect(found.get("hiring-in-texas")).toEqual({ full: false, teaser: true });
-    expect(found.has("pricing-model")).toBe(false);
-    expect(found.has("unreleased")).toBe(false);
-    expect(found.size).toBe(7);
+    expect(found.get("visa-pathways")).toEqual({
+      full: true,
+      teaser: true,
+      xlsx: false,
+      nnn: "001",
+    });
+    expect(found.get("entity-selection")).toEqual({
+      full: true,
+      teaser: false,
+      xlsx: false,
+      nnn: "002",
+    });
+    expect(found.get("biz-plan-builder")).toEqual({
+      full: false,
+      teaser: false,
+      xlsx: true,
+      nnn: "008",
+    });
+    expect(found.get("hiring-in-texas")).toEqual({
+      full: false,
+      teaser: true,
+      xlsx: false,
+      nnn: "111",
+    });
+    expect(found.get("tax_calendar")).toEqual({
+      full: true,
+      teaser: false,
+      xlsx: true,
+      nnn: "112",
+    });
+    expect(found.get("pricing-model")).toEqual({
+      full: false,
+      teaser: false,
+      xlsx: true,
+      nnn: "113",
+    });
+    expect(found.has("old-version")).toBe(false);
+    expect(found.has("nested")).toBe(false);
+    expect(found.size).toBe(9);
+  });
+
+  it("keeps the registry serial when a stray folder reuses a known slug", () => {
+    const found = discoverFromObjectKeys([
+      "library/005-visa-pathways/v1.1-member.pdf",
+      "library/001-visa-pathways/v1.1-teaser.pdf",
+    ]);
+    expect(found.get("visa-pathways")).toEqual({
+      full: false,
+      teaser: true,
+      xlsx: false,
+      nnn: "001",
+    });
   });
 
   it("fails soft: null when R2 is not configured or the listing throws", async () => {
@@ -218,7 +349,7 @@ describe("R2 discovery", () => {
 });
 
 describe("Admin list scales past Pack A", () => {
-  it("Admin list returns > 3 assets when R2 ListObjectsV2 has more than Pack A (seeds Neon, flags off)", async () => {
+  it("Admin list returns every registry serial plus R2 folders beyond it (seeds Neon, flags off)", async () => {
     vi.stubEnv("R2_ACCOUNT_ID", "test-account");
     vi.stubEnv("R2_ACCESS_KEY_ID", "test-key");
     vi.stubEnv("R2_SECRET_ACCESS_KEY", "test-secret");
@@ -229,7 +360,7 @@ describe("Admin list scales past Pack A", () => {
       .mockImplementation(async (command: unknown) => {
         expect(command).toBeInstanceOf(ListObjectsV2Command);
         const input = (command as ListObjectsV2Command).input;
-        expect(input).toMatchObject({ Bucket: "test-bucket", Prefix: "pack-a/" });
+        expect(input).toMatchObject({ Bucket: "test-bucket", Prefix: "library/" });
         return input.ContinuationToken
           ? { Contents: R2_KEYS_PAGE_2.map((Key) => ({ Key })), IsTruncated: false }
           : {
@@ -253,19 +384,19 @@ describe("Admin list scales past Pack A", () => {
     const items = await listLibraryAssetsForAdmin();
 
     expect(send).toHaveBeenCalledTimes(2);
-    expect(items.length).toBeGreaterThanOrEqual(4);
-    expect(items.map((i) => i.slug)).toEqual([
-      "visa-pathways",
-      "entity-selection",
-      "austin-ecosystem-map",
-      "banking-for-founders",
-      "cap-table-basics",
-      "hiring-in-texas",
-      "tax_calendar",
-    ]);
+    expect(items).toHaveLength(LIBRARY_SERIALS.length + UNREGISTERED.length);
+    expect(items.length).toBe(113);
+    const slugs = items.map((i) => i.slug);
+    expect(slugs.slice(0, 3)).toEqual(PACK_A.map((i) => i.slug));
+    expect(slugs.slice(3)).toEqual([...slugs.slice(3)].sort((a, b) => a.localeCompare(b)));
+    for (const slug of [...LIBRARY_SERIALS.map((e) => e.slug), ...UNREGISTERED]) {
+      expect(slugs).toContain(slug);
+    }
+    expect(new Set(slugs).size).toBe(slugs.length);
 
-    // Discovered slugs are seeded with every flag off; existing choices survive.
-    for (const slug of ["cap-table-basics", "banking-for-founders", "hiring-in-texas"]) {
+    // Registry + discovered slugs are seeded with every flag off; existing choices survive.
+    expect(neon.rows.size).toBe(113);
+    for (const slug of ["cap-table-basics", "banking-for-founders", "runway-calc", "vendor-eval"]) {
       expect(neon.rows.get(slug)).toMatchObject({
         downloadable: false,
         teaser_public: false,
@@ -280,28 +411,54 @@ describe("Admin list scales past Pack A", () => {
 
     const bySlug = Object.fromEntries(items.map((i) => [i.slug, i]));
     expect(bySlug["visa-pathways"]).toMatchObject({ downloadable: true, teaserPublic: true });
+    expect(bySlug["visa-pathways"].objectKey).toBe("library/001-visa-pathways/v1.1-member.pdf");
     expect(bySlug["cap-table-basics"]).toMatchObject({
       title: "Cap table basics",
       description: DISCOVERED_DESCRIPTION,
-      objectKey: "pack-a/cap-table-basics.pdf",
-      teaserObjectKey: "pack-a/teasers/cap-table-basics.pdf",
+      nnn: "109",
+      objectKey: "library/109-cap-table-basics/v1.1-member.pdf",
+      teaserObjectKey: "library/109-cap-table-basics/v1.1-teaser.pdf",
+      xlsxObjectKey: null,
       downloadable: false,
       teaserPublic: false,
       landingFull: false,
-      storage: { full: true, teaser: false },
+      storage: { full: true, teaser: false, xlsx: false, nnn: "109" },
     });
-    expect(bySlug["hiring-in-texas"].storage).toEqual({ full: false, teaser: true });
+    expect(bySlug["hiring-in-texas"].storage).toEqual({
+      full: false,
+      teaser: true,
+      xlsx: false,
+      nnn: "111",
+    });
+    expect(bySlug["biz-plan-builder"]).toMatchObject({
+      kind: "xlsx",
+      objectKey: "library/008-biz-plan-builder/v1.1.xlsx",
+      teaserObjectKey: null,
+      storage: { xlsx: true },
+    });
+    expect(bySlug["tax_calendar"].xlsxObjectKey).toBe("library/112-tax_calendar/v1.1.xlsx");
+    expect(bySlug["pricing-model"]).toMatchObject({
+      kind: "xlsx",
+      tag: "Workbook",
+      objectKey: "library/113-pricing-model/v1.1.xlsx",
+    });
+    // Registry serial not on R2 yet: listed with keys, presence all false.
+    expect(bySlug["vendor-eval"]).toMatchObject({
+      nnn: "108",
+      objectKey: "library/108-vendor-eval/v1.1.xlsx",
+      storage: { full: false, teaser: false, xlsx: false },
+    });
   });
 
   it("works with an injected lister (no R2 env) and without a database", async () => {
     const items = await listLibraryAssetsForAdmin({
       lister: async () => [
-        ...PACK_A.map((i) => i.objectKey),
-        "pack-a/one-more.pdf",
-        "pack-a/teasers/two-more.pdf",
+        ...PACK_A.map((i) => i.objectKey!),
+        "library/120-one-more/v1.1-member.pdf",
+        "library/121-two-more/v1.1-teaser.pdf",
       ],
     });
-    expect(items).toHaveLength(5);
+    expect(items).toHaveLength(LIBRARY_SERIALS.length + 2);
     expect(items.every((i) => !i.downloadable && !i.teaserPublic && !i.landingFull)).toBe(
       true,
     );
@@ -319,8 +476,11 @@ describe("Admin list scales past Pack A", () => {
       },
     ]);
     const items = await listLibraryAssetsForAdmin();
-    expect(items.map((i) => i.slug)).toEqual([...PACK_A.map((i) => i.slug), "seeded-earlier"]);
+    expect(items).toHaveLength(LIBRARY_SERIALS.length + 1);
+    expect(items.map((i) => i.slug)).toContain("seeded-earlier");
     expect(items.every((i) => i.storage === null)).toBe(true);
+    // No R2 listing: a Neon-only slug has no serial folder, so no keys.
+    expect(items.find((i) => i.slug === "seeded-earlier")?.objectKey).toBeNull();
   });
 });
 
@@ -337,7 +497,7 @@ describe("member + public catalog include discovered assets", () => {
       },
     ]);
     const { items, flags } = await listLibraryCatalogWithFlags({
-      lister: async () => ["pack-a/from-r2.pdf"],
+      lister: async () => ["library/109-from-r2/v1.1-member.pdf"],
     });
     expect(items.map((i) => i.slug)).toEqual([
       ...PACK_A.map((i) => i.slug),
@@ -354,8 +514,9 @@ describe("member + public catalog include discovered assets", () => {
       memberDownloadable: false,
       teaserPublic: false,
       landingFull: false,
-      fullObjectKey: "pack-a/from-r2.pdf",
-      teaserObjectKey: "pack-a/teasers/from-r2.pdf",
+      fullObjectKey: "library/109-from-r2/v1.1-member.pdf",
+      teaserObjectKey: "library/109-from-r2/v1.1-teaser.pdf",
+      xlsxObjectKey: null,
     });
     expect(bySlug["neon-only"].memberDownloadable).toBe(true);
   });
@@ -431,11 +592,49 @@ describe("bulk flags", () => {
     });
   });
 
+  it("accepts registry serials without a Neon row", async () => {
+    const neon = useFakeNeon();
+    const rows = await setLibraryItemsFlags(["runway-calc", "banking-setup"], { downloadable: true }, "a");
+    expect(rows).toHaveLength(2);
+    expect(neon.rows.get("runway-calc")?.downloadable).toBe(true);
+  });
+
   it("rejects the whole batch when any slug is unknown (nothing written)", async () => {
     const neon = useFakeNeon();
     await expect(
       setLibraryItemsFlags(["visa-pathways", "never-uploaded"], { downloadable: true }, "a"),
     ).rejects.toBeInstanceOf(UnknownLibrarySlugError);
     expect(neon.rows.size).toBe(0);
+  });
+});
+
+describe("resolveLibraryItem", () => {
+  it("builds registry keys without touching Neon or R2", async () => {
+    const lister = vi.fn(async () => []);
+    expect(await resolveLibraryItem("runway-calc", { lister })).toMatchObject({
+      nnn: "084",
+      kind: "xlsx",
+      objectKey: "library/084-runway-calc/v1.1.xlsx",
+    });
+    expect(lister).not.toHaveBeenCalled();
+  });
+
+  it("learns the serial folder from R2 for Neon-only slugs", async () => {
+    useFakeNeon([
+      {
+        slug: "from-r2",
+        downloadable: true,
+        teaser_public: false,
+        landing_full: false,
+        updated_at: "2026-09-21T00:00:00.000Z",
+        updated_by: null,
+      },
+    ]);
+    const item = await resolveLibraryItem("from-r2", {
+      lister: async () => ["library/109-from-r2/v1.1-member.pdf"],
+    });
+    expect(item?.objectKey).toBe("library/109-from-r2/v1.1-member.pdf");
+    expect(await resolveLibraryItem("never-uploaded", { lister: async () => [] })).toBeUndefined();
+    expect(await resolveLibraryItem("001-visa-pathways")).toBeUndefined();
   });
 });

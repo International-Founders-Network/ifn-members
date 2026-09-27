@@ -47,7 +47,7 @@ const NOT_CONFIGURED_REASON =
   "Object storage is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET in Netlify env.";
 
 /**
- * Create a short-lived signed GET URL for a private Pack A object.
+ * Create a short-lived signed GET URL for a private library object.
  * Returns 503-shaped result when storage env is missing (never invent a public URL).
  */
 export async function createSignedDownloadUrl(
@@ -148,7 +148,7 @@ const MAX_LISTED_KEYS = 10_000;
 
 /**
  * Every object key under `prefix` (ListObjectsV2, paginated). Returns null when R2 env
- * is missing so callers can fall back to known Pack A + Neon rows. Throws on R2 errors.
+ * is missing so callers can fall back to the serial registry + Neon rows. Throws on R2 errors.
  */
 export async function listObjectKeys(prefix: string): Promise<string[] | null> {
   const client = getR2Client();
@@ -174,7 +174,10 @@ export async function listObjectKeys(prefix: string): Promise<string[] | null> {
   return keys;
 }
 
-/** All keys under `pack-a/` (full PDFs and `pack-a/teasers/`). Null when R2 env is missing. */
-export function listPackAObjectKeys(): Promise<string[] | null> {
-  return listObjectKeys("pack-a/");
+/**
+ * All keys under `library/` (serial folders `library/<NNN>-<slug>/`). Null when R2 env
+ * is missing.
+ */
+export function listLibraryObjectKeys(): Promise<string[] | null> {
+  return listObjectKeys("library/");
 }

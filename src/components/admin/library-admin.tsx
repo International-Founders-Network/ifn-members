@@ -144,11 +144,17 @@ function StatusPills({ item }: { item: AdminLibraryAsset }) {
   return (
     <>
       <span className={PILL_NEUTRAL}>{item.tag}</span>
-      {item.storage && !item.storage.full ? (
+      {item.kind === "pdf" && item.storage && !item.storage.full ? (
         <span className={PILL_OFF}>No full PDF on R2</span>
       ) : null}
-      {item.storage && !item.storage.teaser ? (
+      {item.kind === "pdf" && item.storage && !item.storage.teaser ? (
         <span className={PILL_OFF}>No teaser on R2</span>
+      ) : null}
+      {item.kind === "xlsx" && item.storage && !item.storage.xlsx ? (
+        <span className={PILL_OFF}>No workbook on R2</span>
+      ) : null}
+      {item.kind === "pdf" && item.storage?.xlsx ? (
+        <span className={PILL_NEUTRAL}>Workbook on R2</span>
       ) : null}
       {item.downloadable ? (
         <span className={PILL_ON}>
@@ -407,23 +413,33 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                         rel="noopener noreferrer"
                         className={TEXT_LINK}
                       >
-                        Preview full PDF
+                        {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
                         <ExternalLink size={16} aria-hidden="true" />
                         <span className="sr-only">(opens in a new tab)</span>
                       </a>
-                      <a
-                        href={`${previewBase}?kind=teaser`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={TEXT_LINK}
-                      >
-                        Preview teaser PDF
-                        <ExternalLink size={16} aria-hidden="true" />
-                        <span className="sr-only">(opens in a new tab)</span>
-                      </a>
+                      {item.teaserObjectKey ? (
+                        <a
+                          href={`${previewBase}?kind=teaser`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={TEXT_LINK}
+                        >
+                          Preview teaser PDF
+                          <ExternalLink size={16} aria-hidden="true" />
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </a>
+                      ) : null}
                     </div>
                     <p className="font-mono text-xs text-[var(--ink-muted)]">
-                      {item.slug} · {item.objectKey} · {item.teaserObjectKey}
+                      {[
+                        item.nnn ? `#${item.nnn}` : "no serial",
+                        item.slug,
+                        item.objectKey ?? "no key yet",
+                        item.teaserObjectKey,
+                        item.kind === "pdf" ? item.xlsxObjectKey : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                     <p className="text-xs text-[var(--ink-muted)]">
                       {item.updated_at && !item.updated_by ? "Discovered" : "Updated"}{" "}

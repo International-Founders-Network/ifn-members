@@ -1,44 +1,64 @@
 import { isValidLibrarySlug } from "@/lib/library-catalog";
-import { listPackAObjectKeys } from "@/lib/storage";
+import { LIBRARY_DOC_VERSION, serialForSlug } from "@/lib/library-serials";
+import { listLibraryObjectKeys } from "@/lib/storage";
 
-/** Which Pack A objects exist on R2 for a slug. */
-export type LibraryObjectPresence = { full: boolean; teaser: boolean };
+/** Which objects exist on R2 for a slug, and the serial folder they were found in. */
+export type LibraryObjectPresence = {
+  full: boolean;
+  teaser: boolean;
+  xlsx: boolean;
+  nnn?: string;
+};
 
-/** Slug → presence for everything found under `pack-a/`. */
+/** Slug → presence for everything found under `library/<NNN>-<slug>/`. */
 export type DiscoveredLibraryObjects = Map<string, LibraryObjectPresence>;
 
-/** Returns every key under `pack-a/`, or null when storage is not configured. */
-export type PackAObjectLister = () => Promise<string[] | null>;
+/** Returns every key under `library/`, or null when storage is not configured. */
+export type LibraryObjectLister = () => Promise<string[] | null>;
 
-const FULL_KEY = /^pack-a\/([^/]+)\.pdf$/;
-const TEASER_KEY = /^pack-a\/teasers\/([^/]+)\.pdf$/;
+export type LibraryObjectKind = "full" | "teaser" | "xlsx";
+
+const VERSION = LIBRARY_DOC_VERSION.replace(/\./g, "\\.");
+const FOLDER = String.raw`^library/(\d{3})-([^/]+)/`;
+
+/** `^library/(\d{3})-([^/]+)/v1\.1-member\.pdf$` etc. (version from LIBRARY_DOC_VERSION). */
+const KEY_PATTERNS: Array<[LibraryObjectKind, RegExp]> = [
+  ["full", new RegExp(`${FOLDER}${VERSION}-member\\.pdf$`)],
+  ["teaser", new RegExp(`${FOLDER}${VERSION}-teaser\\.pdf$`)],
+  ["xlsx", new RegExp(`${FOLDER}${VERSION}\\.xlsx$`)],
+];
 
 /**
- * `pack-a/<slug>.pdf` → full, `pack-a/teasers/<slug>.pdf` → teaser (lowercase `.pdf`,
- * so the key stays derivable from the slug). Non-PDFs (xlsx
- * later), deeper folders and unsafe filenames are ignored (null).
+ * `library/<NNN>-<slug>/v1.1-member.pdf` → full, `…/v1.1-teaser.pdf` → teaser,
+ * `…/v1.1.xlsx` → xlsx (lowercase extensions, so keys stay derivable from the slug).
+ * Legacy flat keys (`library/<slug>.pdf`, `library/teasers/…`, `pack-a/…`), other
+ * versions, deeper folders and unsafe slugs are ignored (null).
  */
 export function classifyLibraryObjectKey(
   key: string,
-): { slug: string; kind: "full" | "teaser" } | null {
-  const teaser = TEASER_KEY.exec(key);
-  if (teaser) {
-    return isValidLibrarySlug(teaser[1]) ? { slug: teaser[1], kind: "teaser" } : null;
-  }
-  const full = FULL_KEY.exec(key);
-  if (full) {
-    return isValidLibrarySlug(full[1]) ? { slug: full[1], kind: "full" } : null;
+): { slug: string; nnn: string; kind: LibraryObjectKind } | null {
+  for (const [kind, pattern] of KEY_PATTERNS) {
+    const hit = pattern.exec(key);
+    if (hit) {
+      return isValidLibrarySlug(hit[2]) ? { slug: hit[2], nnn: hit[1], kind } : null;
+    }
   }
   return null;
 }
 
-/** Group listed keys by slug. Teaser-only slugs are kept (full: false). */
+/**
+ * Group listed keys by slug. Teaser- or workbook-only slugs are kept. A slug's serial is
+ * the registry's (`LIBRARY_SERIALS`) when known, else the first folder listed; keys in a
+ * folder with a different serial are ignored so presence always matches the built keys.
+ */
 export function discoverFromObjectKeys(keys: Iterable<string>): DiscoveredLibraryObjects {
   const found: DiscoveredLibraryObjects = new Map();
   for (const key of keys) {
     const hit = classifyLibraryObjectKey(key);
     if (!hit) continue;
-    const presence = found.get(hit.slug) ?? { full: false, teaser: false };
+    const nnn = serialForSlug(hit.slug)?.nnn ?? found.get(hit.slug)?.nnn ?? hit.nnn;
+    if (hit.nnn !== nnn) continue;
+    const presence = found.get(hit.slug) ?? { full: false, teaser: false, xlsx: false, nnn };
     presence[hit.kind] = true;
     found.set(hit.slug, presence);
   }
@@ -46,11 +66,11 @@ export function discoverFromObjectKeys(keys: Iterable<string>): DiscoveredLibrar
 }
 
 /**
- * List `pack-a/` on R2 and group by slug. Fails soft: null when R2 env is missing or
- * the listing errors, so callers fall back to PACK_A + Neon rows.
+ * List `library/` on R2 and group by slug. Fails soft: null when R2 env is missing or
+ * the listing errors, so callers fall back to the serial registry + PACK_A + Neon rows.
  */
 export async function discoverLibraryCatalog(
-  lister: PackAObjectLister = listPackAObjectKeys,
+  lister: LibraryObjectLister = listLibraryObjectKeys,
 ): Promise<DiscoveredLibraryObjects | null> {
   try {
     const keys = await lister();

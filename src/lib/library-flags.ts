@@ -1,4 +1,4 @@
-import { PACK_A, teaserObjectKey, type LibraryItem } from "@/lib/library-catalog";
+import { PACK_A, type LibraryItem } from "@/lib/library-catalog";
 
 /**
  * Per-asset surface flags. Off always wins for that surface.
@@ -126,8 +126,12 @@ export type PublicLibraryAsset = {
   memberDownloadable: boolean;
   teaserPublic: boolean;
   landingFull: boolean;
-  fullObjectKey: string;
-  teaserObjectKey: string;
+  /** `library/<NNN>-<slug>/v1.1-member.pdf` (or `v1.1.xlsx` for workbooks); null if unknown. */
+  fullObjectKey: string | null;
+  /** `library/<NNN>-<slug>/v1.1-teaser.pdf`; null for workbooks or if unknown. */
+  teaserObjectKey: string | null;
+  /** `library/<NNN>-<slug>/v1.1.xlsx` when the asset has a workbook; else null. */
+  xlsxObjectKey: string | null;
 };
 
 /**
@@ -150,7 +154,8 @@ export function buildPublicLibraryCatalog(
         teaserPublic: Boolean(f.teaserPublic),
         landingFull: Boolean(f.landingFull),
         fullObjectKey: item.objectKey,
-        teaserObjectKey: teaserObjectKey(item.slug),
+        teaserObjectKey: item.teaserObjectKey,
+        xlsxObjectKey: item.xlsxObjectKey,
       };
     }),
   };

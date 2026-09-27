@@ -4,7 +4,7 @@ import {
   isLibraryItemTeaserPublic,
   resolveLibraryItem,
 } from "@/lib/library-assets";
-import { teaserObjectKey, type LibraryItem } from "@/lib/library-catalog";
+import type { LibraryItem } from "@/lib/library-catalog";
 import { publicCorsHeaders } from "@/lib/public-cors";
 import { createSignedUrlForExistingObject } from "@/lib/storage";
 
@@ -13,7 +13,7 @@ export type PublicDownloadKind = "teaser" | "full";
 const SURFACES = {
   teaser: {
     isOn: isLibraryItemTeaserPublic,
-    objectKey: (item: LibraryItem) => teaserObjectKey(item.slug),
+    objectKey: (item: LibraryItem) => item.teaserObjectKey,
     offError: "Public teaser is not enabled for this file.",
     offReason: "teaser_disabled",
   },
@@ -55,9 +55,15 @@ export async function publicLibraryDownload(
     );
   }
 
-  const signed = await createSignedUrlForExistingObject(
-    surface.objectKey(item),
-  );
+  const objectKey = surface.objectKey(item);
+  if (!objectKey) {
+    return NextResponse.json(
+      { error: "This file is not on R2 yet.", reason: "object_missing" },
+      { status: 403, headers },
+    );
+  }
+
+  const signed = await createSignedUrlForExistingObject(objectKey);
   if (!signed.ok) {
     return NextResponse.json(
       { error: signed.error, reason: signed.reason },

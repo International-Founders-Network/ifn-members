@@ -1,0 +1,2188 @@
+{
+  "scheme": "library/<NNN>-<slug>/v1.1-member.pdf | v1.1-teaser.pdf | v1.1.xlsx",
+  "bucket": "ifn-pdfs",
+  "doc_version": "v1.1",
+  "pack_a": [
+    {
+      "nnn": "001",
+      "slug": "visa-pathways"
+    },
+    {
+      "nnn": "002",
+      "slug": "entity-selection"
+    },
+    {
+      "nnn": "003",
+      "slug": "austin-ecosystem-map"
+    }
+  ],
+  "counts": {
+    "assets": 108,
+    "pdf": 93,
+    "xlsx": 15,
+    "copy_ops": 201,
+    "missing_old": 0
+  },
+  "entries": [
+    {
+      "nnn": "001",
+      "slug": "visa-pathways",
+      "kind": "pdf",
+      "old": {
+        "member": "pack-a/visa-pathways.pdf",
+        "teaser": "pack-a/teasers/visa-pathways.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/001-visa-pathways/v1.1-member.pdf",
+        "teaser": "library/001-visa-pathways/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 95899,
+        "teaser": 33086,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "002",
+      "slug": "entity-selection",
+      "kind": "pdf",
+      "old": {
+        "member": "pack-a/entity-selection.pdf",
+        "teaser": "pack-a/teasers/entity-selection.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/002-entity-selection/v1.1-member.pdf",
+        "teaser": "library/002-entity-selection/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 87929,
+        "teaser": 33404,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "003",
+      "slug": "austin-ecosystem-map",
+      "kind": "pdf",
+      "old": {
+        "member": "pack-a/austin-ecosystem-map.pdf",
+        "teaser": "pack-a/teasers/austin-ecosystem-map.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/003-austin-ecosystem-map/v1.1-member.pdf",
+        "teaser": "library/003-austin-ecosystem-map/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 88368,
+        "teaser": 30334,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "004",
+      "slug": "austin-relocation",
+      "kind": "pdf",
+      "old": {
+        "member": "library/austin-relocation.pdf",
+        "teaser": "library/teasers/austin-relocation.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/004-austin-relocation/v1.1-member.pdf",
+        "teaser": "library/004-austin-relocation/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 97547,
+        "teaser": 32448,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "005",
+      "slug": "banking-non-citizens",
+      "kind": "pdf",
+      "old": {
+        "member": "library/banking-non-citizens.pdf",
+        "teaser": "library/teasers/banking-non-citizens.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/005-banking-non-citizens/v1.1-member.pdf",
+        "teaser": "library/005-banking-non-citizens/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 102866,
+        "teaser": 31667,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "006",
+      "slug": "banking-setup",
+      "kind": "pdf",
+      "old": {
+        "member": "library/banking-setup.pdf",
+        "teaser": "library/teasers/banking-setup.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/006-banking-setup/v1.1-member.pdf",
+        "teaser": "library/006-banking-setup/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 104448,
+        "teaser": 32222,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "007",
+      "slug": "biz-model-canvas",
+      "kind": "pdf",
+      "old": {
+        "member": "library/biz-model-canvas.pdf",
+        "teaser": "library/teasers/biz-model-canvas.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/007-biz-model-canvas/v1.1-member.pdf",
+        "teaser": "library/007-biz-model-canvas/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 85690,
+        "teaser": 56859,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "008",
+      "slug": "biz-plan-builder",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/biz-plan-builder.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/008-biz-plan-builder/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 11283
+      }
+    },
+    {
+      "nnn": "009",
+      "slug": "board-toolkit",
+      "kind": "pdf",
+      "old": {
+        "member": "library/board-toolkit.pdf",
+        "teaser": "library/teasers/board-toolkit.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/009-board-toolkit/v1.1-member.pdf",
+        "teaser": "library/009-board-toolkit/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 101854,
+        "teaser": 45376,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "010",
+      "slug": "bookkeeping-setup",
+      "kind": "pdf",
+      "old": {
+        "member": "library/bookkeeping-setup.pdf",
+        "teaser": "library/teasers/bookkeeping-setup.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/010-bookkeeping-setup/v1.1-member.pdf",
+        "teaser": "library/010-bookkeeping-setup/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 103877,
+        "teaser": 35469,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "011",
+      "slug": "build-vs-buy",
+      "kind": "pdf",
+      "old": {
+        "member": "library/build-vs-buy.pdf",
+        "teaser": "library/teasers/build-vs-buy.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/011-build-vs-buy/v1.1-member.pdf",
+        "teaser": "library/011-build-vs-buy/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 58239,
+        "teaser": 33912,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "012",
+      "slug": "business-gc-pathways",
+      "kind": "pdf",
+      "old": {
+        "member": "library/business-gc-pathways.pdf",
+        "teaser": "library/teasers/business-gc-pathways.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/012-business-gc-pathways/v1.1-member.pdf",
+        "teaser": "library/012-business-gc-pathways/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 110898,
+        "teaser": 35560,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "013",
+      "slug": "cap-table-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/cap-table-guide.pdf",
+        "teaser": "library/teasers/cap-table-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/013-cap-table-guide/v1.1-member.pdf",
+        "teaser": "library/013-cap-table-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 104772,
+        "teaser": 33437,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "014",
+      "slug": "cash-flow-template",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/cash-flow-template.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/014-cash-flow-template/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 7624
+      }
+    },
+    {
+      "nnn": "015",
+      "slug": "city-selection",
+      "kind": "pdf",
+      "old": {
+        "member": "library/city-selection.pdf",
+        "teaser": "library/teasers/city-selection.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/015-city-selection/v1.1-member.pdf",
+        "teaser": "library/015-city-selection/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 95569,
+        "teaser": 30871,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "016",
+      "slug": "co-founder-scorecard",
+      "kind": "pdf",
+      "old": {
+        "member": "library/co-founder-scorecard.pdf",
+        "teaser": "library/teasers/co-founder-scorecard.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/016-co-founder-scorecard/v1.1-member.pdf",
+        "teaser": "library/016-co-founder-scorecard/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 52078,
+        "teaser": 33419,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "017",
+      "slug": "cohort-analysis",
+      "kind": "pdf",
+      "old": {
+        "member": "library/cohort-analysis.pdf",
+        "teaser": "library/teasers/cohort-analysis.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/017-cohort-analysis/v1.1-member.pdf",
+        "teaser": "library/017-cohort-analysis/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 97079,
+        "teaser": 41064,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "018",
+      "slug": "comp-analysis",
+      "kind": "pdf",
+      "old": {
+        "member": "library/comp-analysis.pdf",
+        "teaser": "library/teasers/comp-analysis.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/018-comp-analysis/v1.1-member.pdf",
+        "teaser": "library/018-comp-analysis/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 71996,
+        "teaser": 36928,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "019",
+      "slug": "comp-mapping",
+      "kind": "pdf",
+      "old": {
+        "member": "library/comp-mapping.pdf",
+        "teaser": "library/teasers/comp-mapping.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/019-comp-mapping/v1.1-member.pdf",
+        "teaser": "library/019-comp-mapping/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 52241,
+        "teaser": 33253,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "020",
+      "slug": "credit-building",
+      "kind": "pdf",
+      "old": {
+        "member": "library/credit-building.pdf",
+        "teaser": "library/teasers/credit-building.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/020-credit-building/v1.1-member.pdf",
+        "teaser": "library/020-credit-building/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 104021,
+        "teaser": 34841,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "021",
+      "slug": "customer-discovery-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/customer-discovery-guide.pdf",
+        "teaser": "library/teasers/customer-discovery-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/021-customer-discovery-guide/v1.1-member.pdf",
+        "teaser": "library/021-customer-discovery-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 105633,
+        "teaser": 34248,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "022",
+      "slug": "dual-entity",
+      "kind": "pdf",
+      "old": {
+        "member": "library/dual-entity.pdf",
+        "teaser": "library/teasers/dual-entity.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/022-dual-entity/v1.1-member.pdf",
+        "teaser": "library/022-dual-entity/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 105733,
+        "teaser": 33984,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "023",
+      "slug": "due-diligence",
+      "kind": "pdf",
+      "old": {
+        "member": "library/due-diligence.pdf",
+        "teaser": "library/teasers/due-diligence.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/023-due-diligence/v1.1-member.pdf",
+        "teaser": "library/023-due-diligence/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 64262,
+        "teaser": 39260,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "024",
+      "slug": "ein-registration",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ein-registration.pdf",
+        "teaser": "library/teasers/ein-registration.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/024-ein-registration/v1.1-member.pdf",
+        "teaser": "library/024-ein-registration/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 102549,
+        "teaser": 32178,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "025",
+      "slug": "employment-law",
+      "kind": "pdf",
+      "old": {
+        "member": "library/employment-law.pdf",
+        "teaser": "library/teasers/employment-law.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/025-employment-law/v1.1-member.pdf",
+        "teaser": "library/025-employment-law/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 110346,
+        "teaser": 35973,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "026",
+      "slug": "eng-scaling",
+      "kind": "pdf",
+      "old": {
+        "member": "library/eng-scaling.pdf",
+        "teaser": "library/teasers/eng-scaling.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/026-eng-scaling/v1.1-member.pdf",
+        "teaser": "library/026-eng-scaling/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 88385,
+        "teaser": 32458,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "027",
+      "slug": "enterprise-sales",
+      "kind": "pdf",
+      "old": {
+        "member": "library/enterprise-sales.pdf",
+        "teaser": "library/teasers/enterprise-sales.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/027-enterprise-sales/v1.1-member.pdf",
+        "teaser": "library/027-enterprise-sales/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 100873,
+        "teaser": 30218,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "028",
+      "slug": "entry-strategy-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/entry-strategy-guide.pdf",
+        "teaser": "library/teasers/entry-strategy-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/028-entry-strategy-guide/v1.1-member.pdf",
+        "teaser": "library/028-entry-strategy-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 75975,
+        "teaser": 32999,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "029",
+      "slug": "financial-health",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/financial-health.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/029-financial-health/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 9672
+      }
+    },
+    {
+      "nnn": "030",
+      "slug": "first-10-hires",
+      "kind": "pdf",
+      "old": {
+        "member": "library/first-10-hires.pdf",
+        "teaser": "library/teasers/first-10-hires.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/030-first-10-hires/v1.1-member.pdf",
+        "teaser": "library/030-first-10-hires/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 102738,
+        "teaser": 31369,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "031",
+      "slug": "first-100-users",
+      "kind": "pdf",
+      "old": {
+        "member": "library/first-100-users.pdf",
+        "teaser": "library/teasers/first-100-users.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/031-first-100-users/v1.1-member.pdf",
+        "teaser": "library/031-first-100-users/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 92235,
+        "teaser": 36582,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "032",
+      "slug": "first-30-days",
+      "kind": "pdf",
+      "old": {
+        "member": "library/first-30-days.pdf",
+        "teaser": "library/teasers/first-30-days.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/032-first-30-days/v1.1-member.pdf",
+        "teaser": "library/032-first-30-days/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 65037,
+        "teaser": 39740,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "033",
+      "slug": "founder-assessment",
+      "kind": "pdf",
+      "old": {
+        "member": "library/founder-assessment.pdf",
+        "teaser": "library/teasers/founder-assessment.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/033-founder-assessment/v1.1-member.pdf",
+        "teaser": "library/033-founder-assessment/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 49922,
+        "teaser": 34245,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "034",
+      "slug": "founder-prenup",
+      "kind": "pdf",
+      "old": {
+        "member": "library/founder-prenup.pdf",
+        "teaser": "library/teasers/founder-prenup.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/034-founder-prenup/v1.1-member.pdf",
+        "teaser": "library/034-founder-prenup/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 92920,
+        "teaser": 34388,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "035",
+      "slug": "franchise-eval",
+      "kind": "pdf",
+      "old": {
+        "member": "library/franchise-eval.pdf",
+        "teaser": "library/teasers/franchise-eval.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/035-franchise-eval/v1.1-member.pdf",
+        "teaser": "library/035-franchise-eval/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 79790,
+        "teaser": 34359,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "036",
+      "slug": "fundraising-101",
+      "kind": "pdf",
+      "old": {
+        "member": "library/fundraising-101.pdf",
+        "teaser": "library/teasers/fundraising-101.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/036-fundraising-101/v1.1-member.pdf",
+        "teaser": "library/036-fundraising-101/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 98004,
+        "teaser": 34371,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "037",
+      "slug": "global-entity-structures",
+      "kind": "pdf",
+      "old": {
+        "member": "library/global-entity-structures.pdf",
+        "teaser": "library/teasers/global-entity-structures.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/037-global-entity-structures/v1.1-member.pdf",
+        "teaser": "library/037-global-entity-structures/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 79879,
+        "teaser": 31608,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "038",
+      "slug": "global-team-ops",
+      "kind": "pdf",
+      "old": {
+        "member": "library/global-team-ops.pdf",
+        "teaser": "library/teasers/global-team-ops.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/038-global-team-ops/v1.1-member.pdf",
+        "teaser": "library/038-global-team-ops/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 86638,
+        "teaser": 31547,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "039",
+      "slug": "grand-opening-mktg",
+      "kind": "pdf",
+      "old": {
+        "member": "library/grand-opening-mktg.pdf",
+        "teaser": "library/teasers/grand-opening-mktg.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/039-grand-opening-mktg/v1.1-member.pdf",
+        "teaser": "library/039-grand-opening-mktg/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 60095,
+        "teaser": 33558,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "040",
+      "slug": "green-card-sponsorship",
+      "kind": "pdf",
+      "old": {
+        "member": "library/green-card-sponsorship.pdf",
+        "teaser": "library/teasers/green-card-sponsorship.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/040-green-card-sponsorship/v1.1-member.pdf",
+        "teaser": "library/040-green-card-sponsorship/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 107658,
+        "teaser": 37132,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "041",
+      "slug": "gtm-strategy",
+      "kind": "pdf",
+      "old": {
+        "member": "library/gtm-strategy.pdf",
+        "teaser": "library/teasers/gtm-strategy.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/041-gtm-strategy/v1.1-member.pdf",
+        "teaser": "library/041-gtm-strategy/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 100645,
+        "teaser": 30032,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "042",
+      "slug": "hiring-checklist",
+      "kind": "pdf",
+      "old": {
+        "member": "library/hiring-checklist.pdf",
+        "teaser": "library/teasers/hiring-checklist.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/042-hiring-checklist/v1.1-member.pdf",
+        "teaser": "library/042-hiring-checklist/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 65497,
+        "teaser": 41849,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "043",
+      "slug": "ideation-milestones",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ideation-milestones.pdf",
+        "teaser": "library/teasers/ideation-milestones.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/043-ideation-milestones/v1.1-member.pdf",
+        "teaser": "library/043-ideation-milestones/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 64720,
+        "teaser": 39449,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "044",
+      "slug": "intl-estate-planning",
+      "kind": "pdf",
+      "old": {
+        "member": "library/intl-estate-planning.pdf",
+        "teaser": "library/teasers/intl-estate-planning.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/044-intl-estate-planning/v1.1-member.pdf",
+        "teaser": "library/044-intl-estate-planning/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 107845,
+        "teaser": 35704,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "045",
+      "slug": "intl-fundraising",
+      "kind": "pdf",
+      "old": {
+        "member": "library/intl-fundraising.pdf",
+        "teaser": "library/teasers/intl-fundraising.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/045-intl-fundraising/v1.1-member.pdf",
+        "teaser": "library/045-intl-fundraising/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 105931,
+        "teaser": 35879,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "046",
+      "slug": "investor-tracker",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/investor-tracker.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/046-investor-tracker/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 10554
+      }
+    },
+    {
+      "nnn": "047",
+      "slug": "ip-protection",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ip-protection.pdf",
+        "teaser": "library/teasers/ip-protection.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/047-ip-protection/v1.1-member.pdf",
+        "teaser": "library/047-ip-protection/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 121015,
+        "teaser": 38118,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "048",
+      "slug": "ipo-roadmap",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ipo-roadmap.pdf",
+        "teaser": "library/teasers/ipo-roadmap.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/048-ipo-roadmap/v1.1-member.pdf",
+        "teaser": "library/048-ipo-roadmap/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 63587,
+        "teaser": 39206,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "049",
+      "slug": "landing-page-mvp",
+      "kind": "pdf",
+      "old": {
+        "member": "library/landing-page-mvp.pdf",
+        "teaser": "library/teasers/landing-page-mvp.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/049-landing-page-mvp/v1.1-member.pdf",
+        "teaser": "library/049-landing-page-mvp/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 103130,
+        "teaser": 46417,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "050",
+      "slug": "leap-decision-matrix",
+      "kind": "pdf",
+      "old": {
+        "member": "library/leap-decision-matrix.pdf",
+        "teaser": "library/teasers/leap-decision-matrix.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/050-leap-decision-matrix/v1.1-member.pdf",
+        "teaser": "library/050-leap-decision-matrix/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 56928,
+        "teaser": 35230,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "051",
+      "slug": "legal-counsel-eval",
+      "kind": "pdf",
+      "old": {
+        "member": "library/legal-counsel-eval.pdf",
+        "teaser": "library/teasers/legal-counsel-eval.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/051-legal-counsel-eval/v1.1-member.pdf",
+        "teaser": "library/051-legal-counsel-eval/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 67781,
+        "teaser": 39273,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "052",
+      "slug": "licensing-checklist",
+      "kind": "pdf",
+      "old": {
+        "member": "library/licensing-checklist.pdf",
+        "teaser": "library/teasers/licensing-checklist.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/052-licensing-checklist/v1.1-member.pdf",
+        "teaser": "library/052-licensing-checklist/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 76465,
+        "teaser": 39684,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "053",
+      "slug": "local-seo-setup",
+      "kind": "pdf",
+      "old": {
+        "member": "library/local-seo-setup.pdf",
+        "teaser": "library/teasers/local-seo-setup.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/053-local-seo-setup/v1.1-member.pdf",
+        "teaser": "library/053-local-seo-setup/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 112492,
+        "teaser": 32133,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "054",
+      "slug": "localization-checklist",
+      "kind": "pdf",
+      "old": {
+        "member": "library/localization-checklist.pdf",
+        "teaser": "library/teasers/localization-checklist.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/054-localization-checklist/v1.1-member.pdf",
+        "teaser": "library/054-localization-checklist/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 61571,
+        "teaser": 36663,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "055",
+      "slug": "ma-overview",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ma-overview.pdf",
+        "teaser": "library/teasers/ma-overview.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/055-ma-overview/v1.1-member.pdf",
+        "teaser": "library/055-ma-overview/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 109440,
+        "teaser": 30621,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "056",
+      "slug": "market-eval-framework",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/market-eval-framework.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/056-market-eval-framework/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 13239
+      }
+    },
+    {
+      "nnn": "057",
+      "slug": "market-opp-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/market-opp-guide.pdf",
+        "teaser": "library/teasers/market-opp-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/057-market-opp-guide/v1.1-member.pdf",
+        "teaser": "library/057-market-opp-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 43444,
+        "teaser": 32811,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "058",
+      "slug": "market-research-abroad",
+      "kind": "pdf",
+      "old": {
+        "member": "library/market-research-abroad.pdf",
+        "teaser": "library/teasers/market-research-abroad.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/058-market-research-abroad/v1.1-member.pdf",
+        "teaser": "library/058-market-research-abroad/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 87829,
+        "teaser": 31676,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "059",
+      "slug": "market-sizing-calc",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/market-sizing-calc.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/059-market-sizing-calc/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 13299
+      }
+    },
+    {
+      "nnn": "060",
+      "slug": "mktg-automation",
+      "kind": "pdf",
+      "old": {
+        "member": "library/mktg-automation.pdf",
+        "teaser": "library/teasers/mktg-automation.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/060-mktg-automation/v1.1-member.pdf",
+        "teaser": "library/060-mktg-automation/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 115026,
+        "teaser": 37058,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "061",
+      "slug": "monetization-playbook",
+      "kind": "pdf",
+      "old": {
+        "member": "library/monetization-playbook.pdf",
+        "teaser": "library/teasers/monetization-playbook.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/061-monetization-playbook/v1.1-member.pdf",
+        "teaser": "library/061-monetization-playbook/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 88708,
+        "teaser": 32832,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "062",
+      "slug": "multi-country-ops",
+      "kind": "pdf",
+      "old": {
+        "member": "library/multi-country-ops.pdf",
+        "teaser": "library/teasers/multi-country-ops.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/062-multi-country-ops/v1.1-member.pdf",
+        "teaser": "library/062-multi-country-ops/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 94899,
+        "teaser": 34298,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "063",
+      "slug": "multi-location",
+      "kind": "pdf",
+      "old": {
+        "member": "library/multi-location.pdf",
+        "teaser": "library/teasers/multi-location.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/063-multi-location/v1.1-member.pdf",
+        "teaser": "library/063-multi-location/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 117975,
+        "teaser": 32070,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "064",
+      "slug": "mvp-budget",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/mvp-budget.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/064-mvp-budget/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 11170
+      }
+    },
+    {
+      "nnn": "065",
+      "slug": "mvp-scoping",
+      "kind": "pdf",
+      "old": {
+        "member": "library/mvp-scoping.pdf",
+        "teaser": "library/teasers/mvp-scoping.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/065-mvp-scoping/v1.1-member.pdf",
+        "teaser": "library/065-mvp-scoping/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 74907,
+        "teaser": 46612,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "066",
+      "slug": "network-building",
+      "kind": "pdf",
+      "old": {
+        "member": "library/network-building.pdf",
+        "teaser": "library/teasers/network-building.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/066-network-building/v1.1-member.pdf",
+        "teaser": "library/066-network-building/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 93924,
+        "teaser": 30772,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "067",
+      "slug": "ops-audit",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ops-audit.pdf",
+        "teaser": "library/teasers/ops-audit.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/067-ops-audit/v1.1-member.pdf",
+        "teaser": "library/067-ops-audit/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 71350,
+        "teaser": 31946,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "068",
+      "slug": "partnership-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/partnership-guide.pdf",
+        "teaser": "library/teasers/partnership-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/068-partnership-guide/v1.1-member.pdf",
+        "teaser": "library/068-partnership-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 105148,
+        "teaser": 30543,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "069",
+      "slug": "pitch-deck-template",
+      "kind": "pdf",
+      "old": {
+        "member": "library/pitch-deck-template.pdf",
+        "teaser": "library/teasers/pitch-deck-template.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/069-pitch-deck-template/v1.1-member.pdf",
+        "teaser": "library/069-pitch-deck-template/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 86611,
+        "teaser": 53087,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "070",
+      "slug": "pivot-framework",
+      "kind": "pdf",
+      "old": {
+        "member": "library/pivot-framework.pdf",
+        "teaser": "library/teasers/pivot-framework.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/070-pivot-framework/v1.1-member.pdf",
+        "teaser": "library/070-pivot-framework/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 85692,
+        "teaser": 32601,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "071",
+      "slug": "pmf-dashboard",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/pmf-dashboard.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/071-pmf-dashboard/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 9468
+      }
+    },
+    {
+      "nnn": "072",
+      "slug": "pmf-survey",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/pmf-survey.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/072-pmf-survey/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 7185
+      }
+    },
+    {
+      "nnn": "073",
+      "slug": "post-exit-planning",
+      "kind": "pdf",
+      "old": {
+        "member": "library/post-exit-planning.pdf",
+        "teaser": "library/teasers/post-exit-planning.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/073-post-exit-planning/v1.1-member.pdf",
+        "teaser": "library/073-post-exit-planning/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 109469,
+        "teaser": 30986,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "074",
+      "slug": "pre-arrival-financial",
+      "kind": "pdf",
+      "old": {
+        "member": "library/pre-arrival-financial.pdf",
+        "teaser": "library/teasers/pre-arrival-financial.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/074-pre-arrival-financial/v1.1-member.pdf",
+        "teaser": "library/074-pre-arrival-financial/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 67208,
+        "teaser": 37325,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "075",
+      "slug": "pricing-worksheet",
+      "kind": "pdf",
+      "old": {
+        "member": "library/pricing-worksheet.pdf",
+        "teaser": "library/teasers/pricing-worksheet.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/075-pricing-worksheet/v1.1-member.pdf",
+        "teaser": "library/075-pricing-worksheet/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 69351,
+        "teaser": 34279,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "076",
+      "slug": "problem-solution-fit",
+      "kind": "pdf",
+      "old": {
+        "member": "library/problem-solution-fit.pdf",
+        "teaser": "library/teasers/problem-solution-fit.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/076-problem-solution-fit/v1.1-member.pdf",
+        "teaser": "library/076-problem-solution-fit/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 59964,
+        "teaser": 41091,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "077",
+      "slug": "problem-solving-framework",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/problem-solving-framework.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/077-problem-solving-framework/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 9326
+      }
+    },
+    {
+      "nnn": "078",
+      "slug": "product-expansion",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/product-expansion.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/078-product-expansion/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 8500
+      }
+    },
+    {
+      "nnn": "079",
+      "slug": "professional-network",
+      "kind": "pdf",
+      "old": {
+        "member": "library/professional-network.pdf",
+        "teaser": "library/teasers/professional-network.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/079-professional-network/v1.1-member.pdf",
+        "teaser": "library/079-professional-network/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 95449,
+        "teaser": 31484,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "080",
+      "slug": "registration-checklist",
+      "kind": "pdf",
+      "old": {
+        "member": "library/registration-checklist.pdf",
+        "teaser": "library/teasers/registration-checklist.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/080-registration-checklist/v1.1-member.pdf",
+        "teaser": "library/080-registration-checklist/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 69263,
+        "teaser": 41274,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "081",
+      "slug": "regulatory-env",
+      "kind": "pdf",
+      "old": {
+        "member": "library/regulatory-env.pdf",
+        "teaser": "library/teasers/regulatory-env.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/081-regulatory-env/v1.1-member.pdf",
+        "teaser": "library/081-regulatory-env/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 102116,
+        "teaser": 36188,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "082",
+      "slug": "remote-entity",
+      "kind": "pdf",
+      "old": {
+        "member": "library/remote-entity.pdf",
+        "teaser": "library/teasers/remote-entity.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/082-remote-entity/v1.1-member.pdf",
+        "teaser": "library/082-remote-entity/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 97972,
+        "teaser": 34097,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "083",
+      "slug": "retention-playbook",
+      "kind": "pdf",
+      "old": {
+        "member": "library/retention-playbook.pdf",
+        "teaser": "library/teasers/retention-playbook.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/083-retention-playbook/v1.1-member.pdf",
+        "teaser": "library/083-retention-playbook/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 116132,
+        "teaser": 31182,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "084",
+      "slug": "runway-calc",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/runway-calc.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/084-runway-calc/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 12157
+      }
+    },
+    {
+      "nnn": "085",
+      "slug": "sba-loan-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/sba-loan-guide.pdf",
+        "teaser": "library/teasers/sba-loan-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/085-sba-loan-guide/v1.1-member.pdf",
+        "teaser": "library/085-sba-loan-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 107002,
+        "teaser": 35206,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "086",
+      "slug": "scaling-ops",
+      "kind": "pdf",
+      "old": {
+        "member": "library/scaling-ops.pdf",
+        "teaser": "library/teasers/scaling-ops.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/086-scaling-ops/v1.1-member.pdf",
+        "teaser": "library/086-scaling-ops/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 104298,
+        "teaser": 31326,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "087",
+      "slug": "scaling-states",
+      "kind": "pdf",
+      "old": {
+        "member": "library/scaling-states.pdf",
+        "teaser": "library/teasers/scaling-states.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/087-scaling-states/v1.1-member.pdf",
+        "teaser": "library/087-scaling-states/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 117276,
+        "teaser": 30580,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "088",
+      "slug": "secondary-sales",
+      "kind": "pdf",
+      "old": {
+        "member": "library/secondary-sales.pdf",
+        "teaser": "library/teasers/secondary-sales.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/088-secondary-sales/v1.1-member.pdf",
+        "teaser": "library/088-secondary-sales/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 96390,
+        "teaser": 33295,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "089",
+      "slug": "series-a-ready",
+      "kind": "pdf",
+      "old": {
+        "member": "library/series-a-ready.pdf",
+        "teaser": "library/teasers/series-a-ready.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/089-series-a-ready/v1.1-member.pdf",
+        "teaser": "library/089-series-a-ready/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 63202,
+        "teaser": 34942,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "090",
+      "slug": "smb-customer-acq",
+      "kind": "pdf",
+      "old": {
+        "member": "library/smb-customer-acq.pdf",
+        "teaser": "library/teasers/smb-customer-acq.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/090-smb-customer-acq/v1.1-member.pdf",
+        "teaser": "library/090-smb-customer-acq/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 112057,
+        "teaser": 30924,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "091",
+      "slug": "smb-entity-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/smb-entity-guide.pdf",
+        "teaser": "library/teasers/smb-entity-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/091-smb-entity-guide/v1.1-member.pdf",
+        "teaser": "library/091-smb-entity-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 44160,
+        "teaser": 35197,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "092",
+      "slug": "smb-funding-options",
+      "kind": "pdf",
+      "old": {
+        "member": "library/smb-funding-options.pdf",
+        "teaser": "library/teasers/smb-funding-options.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/092-smb-funding-options/v1.1-member.pdf",
+        "teaser": "library/092-smb-funding-options/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 117726,
+        "teaser": 33169,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "093",
+      "slug": "smb-tax-strategy",
+      "kind": "pdf",
+      "old": {
+        "member": "library/smb-tax-strategy.pdf",
+        "teaser": "library/teasers/smb-tax-strategy.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/093-smb-tax-strategy/v1.1-member.pdf",
+        "teaser": "library/093-smb-tax-strategy/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 119257,
+        "teaser": 33517,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "094",
+      "slug": "sop-template",
+      "kind": "pdf",
+      "old": {
+        "member": "library/sop-template.pdf",
+        "teaser": "library/teasers/sop-template.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/094-sop-template/v1.1-member.pdf",
+        "teaser": "library/094-sop-template/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 90445,
+        "teaser": 45330,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "095",
+      "slug": "ssn-itin-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/ssn-itin-guide.pdf",
+        "teaser": "library/teasers/ssn-itin-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/095-ssn-itin-guide/v1.1-member.pdf",
+        "teaser": "library/095-ssn-itin-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 102600,
+        "teaser": 34314,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "096",
+      "slug": "startup-cost-est",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/startup-cost-est.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/096-startup-cost-est/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 12416
+      }
+    },
+    {
+      "nnn": "097",
+      "slug": "state-env-compare",
+      "kind": "pdf",
+      "old": {
+        "member": "library/state-env-compare.pdf",
+        "teaser": "library/teasers/state-env-compare.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/097-state-env-compare/v1.1-member.pdf",
+        "teaser": "library/097-state-env-compare/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 98844,
+        "teaser": 32592,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "098",
+      "slug": "succession-toolkit",
+      "kind": "pdf",
+      "old": {
+        "member": "library/succession-toolkit.pdf",
+        "teaser": "library/teasers/succession-toolkit.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/098-succession-toolkit/v1.1-member.pdf",
+        "teaser": "library/098-succession-toolkit/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 95640,
+        "teaser": 33810,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "099",
+      "slug": "tax-obligations",
+      "kind": "pdf",
+      "old": {
+        "member": "library/tax-obligations.pdf",
+        "teaser": "library/teasers/tax-obligations.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/099-tax-obligations/v1.1-member.pdf",
+        "teaser": "library/099-tax-obligations/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 107405,
+        "teaser": 34097,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "100",
+      "slug": "tech-arch-guide",
+      "kind": "pdf",
+      "old": {
+        "member": "library/tech-arch-guide.pdf",
+        "teaser": "library/teasers/tech-arch-guide.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/100-tech-arch-guide/v1.1-member.pdf",
+        "teaser": "library/100-tech-arch-guide/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 84154,
+        "teaser": 33062,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "101",
+      "slug": "tech-roadmap",
+      "kind": "pdf",
+      "old": {
+        "member": "library/tech-roadmap.pdf",
+        "teaser": "library/teasers/tech-roadmap.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/101-tech-roadmap/v1.1-member.pdf",
+        "teaser": "library/101-tech-roadmap/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 113326,
+        "teaser": 31442,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "102",
+      "slug": "tech-stack-starter",
+      "kind": "pdf",
+      "old": {
+        "member": "library/tech-stack-starter.pdf",
+        "teaser": "library/teasers/tech-stack-starter.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/102-tech-stack-starter/v1.1-member.pdf",
+        "teaser": "library/102-tech-stack-starter/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 121352,
+        "teaser": 35058,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "103",
+      "slug": "term-sheet-decoder",
+      "kind": "pdf",
+      "old": {
+        "member": "library/term-sheet-decoder.pdf",
+        "teaser": "library/teasers/term-sheet-decoder.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/103-term-sheet-decoder/v1.1-member.pdf",
+        "teaser": "library/103-term-sheet-decoder/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 115586,
+        "teaser": 31497,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "104",
+      "slug": "transition-playbook",
+      "kind": "pdf",
+      "old": {
+        "member": "library/transition-playbook.pdf",
+        "teaser": "library/teasers/transition-playbook.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/104-transition-playbook/v1.1-member.pdf",
+        "teaser": "library/104-transition-playbook/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 108961,
+        "teaser": 33893,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "105",
+      "slug": "us-biz-culture",
+      "kind": "pdf",
+      "old": {
+        "member": "library/us-biz-culture.pdf",
+        "teaser": "library/teasers/us-biz-culture.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/105-us-biz-culture/v1.1-member.pdf",
+        "teaser": "library/105-us-biz-culture/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 82100,
+        "teaser": 32294,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "106",
+      "slug": "user-testing-scripts",
+      "kind": "pdf",
+      "old": {
+        "member": "library/user-testing-scripts.pdf",
+        "teaser": "library/teasers/user-testing-scripts.pdf",
+        "xlsx": null
+      },
+      "new": {
+        "member": "library/106-user-testing-scripts/v1.1-member.pdf",
+        "teaser": "library/106-user-testing-scripts/v1.1-teaser.pdf",
+        "xlsx": null
+      },
+      "sizes": {
+        "member": 99392,
+        "teaser": 32672,
+        "xlsx": null
+      }
+    },
+    {
+      "nnn": "107",
+      "slug": "validation-tracker",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/validation-tracker.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/107-validation-tracker/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 7145
+      }
+    },
+    {
+      "nnn": "108",
+      "slug": "vendor-eval",
+      "kind": "xlsx",
+      "old": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/vendor-eval.xlsx"
+      },
+      "new": {
+        "member": null,
+        "teaser": null,
+        "xlsx": "library/108-vendor-eval/v1.1.xlsx"
+      },
+      "sizes": {
+        "member": null,
+        "teaser": null,
+        "xlsx": 8967
+      }
+    }
+  ]
+}

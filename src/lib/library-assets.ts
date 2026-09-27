@@ -4,19 +4,19 @@ import {
   isValidLibrarySlug,
   libraryItemForSlug,
   mergeLibraryCatalog,
-  teaserObjectKey,
   type LibraryItem,
 } from "@/lib/library-catalog";
 import {
   discoverLibraryCatalog,
+  type LibraryObjectLister,
   type LibraryObjectPresence,
-  type PackAObjectLister,
 } from "@/lib/library-discover";
 import {
   defaultLibraryFlagsMap,
   type LibraryAssetFlags,
   type LibraryFlagsPatch,
 } from "@/lib/library-flags";
+import { LIBRARY_SERIALS, serialForSlug } from "@/lib/library-serials";
 
 /**
  * `downloadable` = "member on" (column name kept from PR #1).
@@ -181,12 +181,17 @@ export async function ensureLibraryAssetsSeeded(slugs: string[]): Promise<string
   return rows.map((row) => row.slug);
 }
 
+/** PACK_A or in the serial registry: known without a Neon row. */
+function isRegisteredLibrarySlug(slug: string): boolean {
+  return Boolean(getLibraryItem(slug) ?? serialForSlug(slug));
+}
+
 /**
- * Known = PACK_A or has a Neon row (every R2-discovered slug is seeded by Admin list).
- * Returns the slugs that are neither.
+ * Known = PACK_A, serial registry, or has a Neon row (every R2-discovered slug is seeded
+ * by Admin list). Returns the slugs that are none of those.
  */
 async function findUnknownLibrarySlugs(slugs: string[]): Promise<string[]> {
-  const candidates = slugs.filter((slug) => !getLibraryItem(slug));
+  const candidates = slugs.filter((slug) => !isRegisteredLibrarySlug(slug));
   if (candidates.length === 0) return [];
 
   const sql = getSql();
@@ -200,17 +205,23 @@ async function findUnknownLibrarySlugs(slugs: string[]): Promise<string[]> {
 }
 
 /**
- * Catalog entry for a slug the routes may serve: PACK_A, or any valid slug with a Neon
- * row (R2 uploads are seeded as rows). Undefined otherwise or on DB error (fail closed).
+ * Catalog entry for a slug the routes may serve: PACK_A, the serial registry, or any
+ * valid slug with a Neon row (R2 uploads are seeded as rows). Registry slugs build their
+ * keys directly; others list R2 once to learn their serial folder (keys stay null when
+ * R2 has none). Undefined for unknown slugs or on DB error (fail closed).
  */
-export async function resolveLibraryItem(slug: string): Promise<LibraryItem | undefined> {
-  const known = getLibraryItem(slug);
-  if (known) return known;
+export async function resolveLibraryItem(
+  slug: string,
+  options: { lister?: LibraryObjectLister } = {},
+): Promise<LibraryItem | undefined> {
   if (!isValidLibrarySlug(slug)) return undefined;
+  if (isRegisteredLibrarySlug(slug)) return libraryItemForSlug(slug);
 
   try {
     const unknown = await findUnknownLibrarySlugs([slug]);
-    return unknown.length === 0 ? libraryItemForSlug(slug) : undefined;
+    if (unknown.length > 0) return undefined;
+    const discovered = await discoverLibraryCatalog(options.lister);
+    return libraryItemForSlug(slug, discovered?.get(slug));
   } catch (error) {
     console.error(
       "library_assets slug lookup failed:",
@@ -223,49 +234,52 @@ export async function resolveLibraryItem(slug: string): Promise<LibraryItem | un
 /**
  * Member library + public catalog: PACK_A ∪ R2 discovery ∪ Neon rows, with flags.
  * Read-only (no seeding) and fail-soft: R2 or DB trouble just narrows the list / turns
- * flags off.
+ * flags off. Registry serials show up here once Admin has seeded them into Neon.
  */
 export async function listLibraryCatalogWithFlags(
-  options: { lister?: PackAObjectLister } = {},
+  options: { lister?: LibraryObjectLister } = {},
 ): Promise<{ items: LibraryItem[]; flags: Record<string, LibraryAssetFlags> }> {
   const [discovered, flags] = await Promise.all([
     discoverLibraryCatalog(options.lister),
     getLibraryAssetFlags(),
   ]);
-  const items = mergeLibraryCatalog([...(discovered?.keys() ?? []), ...Object.keys(flags)]);
+  const items = mergeLibraryCatalog(
+    [...(discovered?.keys() ?? []), ...Object.keys(flags)],
+    discovered,
+  );
   return { items, flags };
 }
 
-export type AdminLibraryAsset = LibraryAssetFlags & {
-  slug: string;
-  title: string;
-  description: string;
-  tag: string;
-  objectKey: string;
-  teaserObjectKey: string;
-  /** What R2 holds for this slug; null when storage is not configured or listing failed. */
-  storage: LibraryObjectPresence | null;
-  updated_at: string | null;
-  updated_by: string | null;
-};
+export type AdminLibraryAsset = LibraryAssetFlags &
+  LibraryItem & {
+    /** What R2 holds for this slug; null when storage is not configured or listing failed. */
+    storage: LibraryObjectPresence | null;
+    updated_at: string | null;
+    updated_by: string | null;
+  };
 
 /**
- * Every asset Admin can act on: R2 discovery (`pack-a/` + `pack-a/teasers/`) ∪ PACK_A ∪
- * Neon rows. Newly discovered slugs are seeded into Neon with all flags off first, so
- * their switches save immediately. A failed seed is logged, never hides an upload.
+ * Every asset Admin can act on: serial registry (`LIBRARY_SERIALS`) ∪ R2 discovery
+ * (`library/<NNN>-<slug>/`) ∪ PACK_A ∪ Neon rows. Registry and newly discovered slugs
+ * are seeded into Neon with all flags off first, so their switches save immediately. A
+ * failed seed is logged, never hides an asset.
  */
 export async function listLibraryAssetsForAdmin(
-  options: { lister?: PackAObjectLister } = {},
+  options: { lister?: LibraryObjectLister } = {},
 ): Promise<AdminLibraryAsset[]> {
   const discovered = await discoverLibraryCatalog(options.lister);
+  const listed = [
+    ...LIBRARY_SERIALS.map((entry) => entry.slug),
+    ...(discovered?.keys() ?? []),
+  ];
   const sql = getSql();
   const bySlug = new Map<string, LibraryAssetRow>();
 
   if (sql) {
     await ensureLibraryAssetsTable();
-    if (discovered && discovered.size > 0) {
+    if (listed.length > 0) {
       try {
-        await ensureLibraryAssetsSeeded([...discovered.keys()]);
+        await ensureLibraryAssetsSeeded(listed);
       } catch (error) {
         console.error(
           "library_assets seed failed:",
@@ -282,18 +296,13 @@ export async function listLibraryAssetsForAdmin(
     }
   }
 
-  const items = mergeLibraryCatalog([...(discovered?.keys() ?? []), ...bySlug.keys()]);
+  const items = mergeLibraryCatalog([...listed, ...bySlug.keys()], discovered);
   return items.map((item) => {
     const row = bySlug.get(item.slug);
     return {
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      tag: item.tag,
-      objectKey: item.objectKey,
-      teaserObjectKey: teaserObjectKey(item.slug),
+      ...item,
       storage: discovered
-        ? (discovered.get(item.slug) ?? { full: false, teaser: false })
+        ? (discovered.get(item.slug) ?? { full: false, teaser: false, xlsx: false })
         : null,
       ...rowToFlags(row),
       updated_at: row?.updated_at ?? null,
@@ -302,7 +311,7 @@ export async function listLibraryAssetsForAdmin(
   });
 }
 
-/** Thrown when a flag save names a slug that is neither PACK_A nor in Neon. */
+/** Thrown when a flag save names a slug that is not PACK_A, the registry or in Neon. */
 export class UnknownLibrarySlugError extends Error {
   readonly slugs: string[];
 
@@ -315,7 +324,7 @@ export class UnknownLibrarySlugError extends Error {
 /**
  * Upsert any subset of the three flags for one or many slugs in one statement. Omitted
  * flags keep their stored value (or default FALSE on first insert). Every slug must be
- * PACK_A or already have a Neon row, else nothing is written. Does not touch R2.
+ * PACK_A, in the serial registry or already have a Neon row, else nothing is written. Does not touch R2.
  */
 export async function setLibraryItemsFlags(
   slugs: string[],

@@ -1,5 +1,14 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { PACK_A, getLibraryItem, teaserObjectKey } from "./library-catalog";
+import {
+  PACK_A,
+  fullObjectKey,
+  getLibraryItem,
+  libraryItemForSlug,
+  teaserObjectKey,
+  xlsxObjectKey,
+} from "./library-catalog";
 import {
   buildPublicLibraryCatalog,
   defaultLibraryFlagsMap,
@@ -12,6 +21,17 @@ import {
   matchesLibraryQuery,
 } from "./library-filter";
 import { isAllowedPublicOrigin, publicCorsHeaders } from "./public-cors";
+import { LIBRARY_DOC_VERSION, LIBRARY_SERIALS, serialForSlug } from "./library-serials";
+
+type KeyMapEntry = {
+  nnn: string;
+  slug: string;
+  kind: "pdf" | "xlsx";
+  new: { member: string | null; teaser: string | null; xlsx: string | null };
+};
+const KEY_MAP = JSON.parse(
+  readFileSync(join(process.cwd(), "docs/library-r2-key-map.json"), "utf8"),
+) as { doc_version: string; entries: KeyMapEntry[] };
 
 const ALL_OFF: LibraryAssetFlags = {
   downloadable: false,
@@ -32,26 +52,75 @@ function canMemberDownload(
 }
 
 describe("Pack A catalog", () => {
-  it("has the three expected Pack A slugs and full R2 keys", () => {
+  it("has the three expected Pack A slugs and serial-folder R2 keys", () => {
     expect(PACK_A.map((i) => i.slug)).toEqual([
       "visa-pathways",
       "entity-selection",
       "austin-ecosystem-map",
     ]);
     expect(PACK_A.map((i) => i.objectKey)).toEqual([
-      "pack-a/visa-pathways.pdf",
-      "pack-a/entity-selection.pdf",
-      "pack-a/austin-ecosystem-map.pdf",
+      "library/001-visa-pathways/v1.1-member.pdf",
+      "library/002-entity-selection/v1.1-member.pdf",
+      "library/003-austin-ecosystem-map/v1.1-member.pdf",
     ]);
+    for (const item of PACK_A) {
+      expect(item.objectKey).toBe(fullObjectKey(item.slug));
+      expect(item.teaserObjectKey).toBe(teaserObjectKey(item.slug));
+      expect(item.nnn).toBe(serialForSlug(item.slug)?.nnn);
+    }
   });
 
-  it("teaser keys live under pack-a/teasers/<slug>.pdf", () => {
-    expect(teaserObjectKey("visa-pathways")).toBe("pack-a/teasers/visa-pathways.pdf");
+  it("builds member, teaser and xlsx keys in one serial folder", () => {
+    expect(fullObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-member.pdf");
+    expect(teaserObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-teaser.pdf");
+    expect(fullObjectKey("austin-relocation")).toBe(
+      "library/004-austin-relocation/v1.1-member.pdf",
+    );
+    expect(xlsxObjectKey("biz-plan-builder")).toBe("library/008-biz-plan-builder/v1.1.xlsx");
+    // Outside the registry: needs a serial from discovery, else null.
+    expect(fullObjectKey("brand-new")).toBeNull();
+    expect(teaserObjectKey("brand-new", "109")).toBe("library/109-brand-new/v1.1-teaser.pdf");
+    // The registry serial wins over a hint.
+    expect(fullObjectKey("visa-pathways", "999")).toBe(
+      "library/001-visa-pathways/v1.1-member.pdf",
+    );
   });
 
   it("getLibraryItem rejects unknown slugs", () => {
     expect(getLibraryItem("not-a-real-pdf")).toBeUndefined();
     expect(getLibraryItem("visa-pathways")?.title).toBe("Visa pathways");
+  });
+});
+
+describe("serial registry", () => {
+  it("has 108 assets numbered 001–108: Pack A first, then A→Z", () => {
+    expect(LIBRARY_SERIALS).toHaveLength(108);
+    expect(LIBRARY_SERIALS.map((e) => e.nnn)).toEqual(
+      Array.from({ length: 108 }, (_, i) => String(i + 1).padStart(3, "0")),
+    );
+    expect(LIBRARY_SERIALS.slice(0, 3).map((e) => e.slug)).toEqual(PACK_A.map((i) => i.slug));
+    const rest = LIBRARY_SERIALS.slice(3).map((e) => e.slug);
+    expect(rest).toEqual([...rest].sort());
+    expect(new Set(LIBRARY_SERIALS.map((e) => e.slug)).size).toBe(108);
+  });
+
+  it("builders reproduce every new key in docs/library-r2-key-map.json", () => {
+    expect(KEY_MAP.doc_version).toBe(LIBRARY_DOC_VERSION);
+    expect(KEY_MAP.entries.map(({ nnn, slug, kind }) => ({ nnn, slug, kind }))).toEqual(
+      LIBRARY_SERIALS.map(({ nnn, slug, kind }) => ({ nnn, slug, kind })),
+    );
+    for (const entry of KEY_MAP.entries) {
+      const item = libraryItemForSlug(entry.slug);
+      if (entry.kind === "pdf") {
+        expect(item.objectKey).toBe(entry.new.member);
+        expect(item.teaserObjectKey).toBe(entry.new.teaser);
+        expect(item.xlsxObjectKey).toBeNull();
+      } else {
+        expect(item.objectKey).toBe(entry.new.xlsx);
+        expect(item.xlsxObjectKey).toBe(entry.new.xlsx);
+        expect(item.teaserObjectKey).toBeNull();
+      }
+    }
   });
 });
 
@@ -139,8 +208,9 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "pack-a/visa-pathways.pdf",
-        teaserObjectKey: "pack-a/teasers/visa-pathways.pdf",
+        fullObjectKey: "library/001-visa-pathways/v1.1-member.pdf",
+        teaserObjectKey: "library/001-visa-pathways/v1.1-teaser.pdf",
+        xlsxObjectKey: null,
       },
       {
         id: "entity-selection",
@@ -149,8 +219,9 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "pack-a/entity-selection.pdf",
-        teaserObjectKey: "pack-a/teasers/entity-selection.pdf",
+        fullObjectKey: "library/002-entity-selection/v1.1-member.pdf",
+        teaserObjectKey: "library/002-entity-selection/v1.1-teaser.pdf",
+        xlsxObjectKey: null,
       },
       {
         id: "austin-ecosystem-map",
@@ -159,8 +230,9 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "pack-a/austin-ecosystem-map.pdf",
-        teaserObjectKey: "pack-a/teasers/austin-ecosystem-map.pdf",
+        fullObjectKey: "library/003-austin-ecosystem-map/v1.1-member.pdf",
+        teaserObjectKey: "library/003-austin-ecosystem-map/v1.1-teaser.pdf",
+        xlsxObjectKey: null,
       },
     ]);
   });
@@ -211,6 +283,7 @@ describe("public catalog", () => {
         "teaserObjectKey",
         "teaserPublic",
         "title",
+        "xlsxObjectKey",
       ]);
     }
   });

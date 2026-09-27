@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { isClerkAdmin } from "@/lib/auth-helpers";
 import { resolveLibraryItem } from "@/lib/library-assets";
-import { teaserObjectKey } from "@/lib/library-catalog";
 import { createSignedUrlForExistingObject } from "@/lib/storage";
 
 type Params = { params: Promise<{ slug: string }> };
 
 /**
- * Admin review-in-place: `?kind=full|teaser` → 302 to a 5-minute signed R2 URL.
+ * Admin review-in-place: `?kind=full|teaser` → 302 to a 5-minute signed R2 URL
+ * (`full` is the workbook for xlsx-only assets; they have no teaser).
  * Ignores every surface flag (admins may always preview). Missing object ⇒ 403
  * `{ reason: "object_missing" }` naming the key.
  */
@@ -36,7 +36,13 @@ export async function GET(req: Request, { params }: Params) {
     );
   }
 
-  const objectKey = kind === "full" ? item.objectKey : teaserObjectKey(item.slug);
+  const objectKey = kind === "full" ? item.objectKey : item.teaserObjectKey;
+  if (!objectKey) {
+    return NextResponse.json(
+      { error: `No ${kind} object for this item on R2.`, reason: "object_missing" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
   const signed = await createSignedUrlForExistingObject(objectKey);
   if (!signed.ok) {
     return NextResponse.json(
