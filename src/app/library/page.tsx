@@ -1,10 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { MemberLibrary } from "@/components/library/member-library";
 import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
-import { getLibraryAssetFlags } from "@/lib/library-assets";
-import { PACK_A } from "@/lib/library-catalog";
-import { defaultLibraryFlagsMap } from "@/lib/library-flags";
+import { listLibraryCatalogWithFlags } from "@/lib/library-assets";
 import { isMemberEntitled } from "@/lib/membership";
 
 export default async function LibraryPage() {
@@ -16,10 +15,9 @@ export default async function LibraryPage() {
     ? await isMemberEntitled(email)
     : { entitled: false as const, reason: "no_email" as const };
 
-  // Member on (`downloadable`) only; teaserPublic never unlocks the full PDF.
-  const assetFlags = entitlement.entitled
-    ? await getLibraryAssetFlags()
-    : defaultLibraryFlagsMap();
+  // Every uploaded asset is listed; Member on (`downloadable`) alone gates the full PDF.
+  // teaserPublic / landingFull never unlock it here.
+  const { items, flags: assetFlags } = await listLibraryCatalogWithFlags();
 
   return (
     <div className="space-y-8">
@@ -51,48 +49,17 @@ export default async function LibraryPage() {
         />
       ) : null}
 
-      <ul className="space-y-4">
-        {PACK_A.map((item) => {
-          const canDownload =
-            entitlement.entitled && Boolean(assetFlags[item.slug]?.downloadable);
-
-          return (
-            <li
-              key={item.slug}
-              className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-5 shadow-sm"
-            >
-              <h2 className="text-lg font-semibold">{item.title}</h2>
-              <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">
-                {item.description}
-              </p>
-              {!entitlement.entitled ? (
-                <p className="mt-3 text-sm text-[var(--ink-muted)]">
-                  Available after membership is linked.
-                </p>
-              ) : canDownload ? (
-                <a
-                  href={`/api/library/${item.slug}/download`}
-                  className="mt-4 inline-flex rounded-full bg-[var(--crimson)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-                >
-                  Download PDF
-                </a>
-              ) : (
-                <p className="mt-4">
-                  <span
-                    aria-disabled="true"
-                    className="inline-flex cursor-not-allowed rounded-full bg-[var(--ink-muted)]/25 px-4 py-2 text-sm font-medium text-[var(--ink-muted)]"
-                  >
-                    Download unavailable
-                  </span>
-                  <span className="mt-2 block text-sm text-[var(--ink-muted)]">
-                    This file is not enabled for download yet.
-                  </span>
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      <MemberLibrary
+        entitled={entitlement.entitled}
+        items={items.map((item) => ({
+          slug: item.slug,
+          title: item.title,
+          description: item.description,
+          tag: item.tag,
+          canDownload:
+            entitlement.entitled && Boolean(assetFlags[item.slug]?.downloadable),
+        }))}
+      />
     </div>
   );
 }

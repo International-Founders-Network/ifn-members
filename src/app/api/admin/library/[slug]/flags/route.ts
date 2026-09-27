@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { isClerkAdmin } from "@/lib/auth-helpers";
-import { getLibraryItem } from "@/lib/library-catalog";
-import { setLibraryItemFlags } from "@/lib/library-assets";
+import { isValidLibrarySlug } from "@/lib/library-catalog";
+import { UnknownLibrarySlugError, setLibraryItemFlags } from "@/lib/library-assets";
 import { parseLibraryFlagsPatch } from "@/lib/library-flags";
 
 type Params = { params: Promise<{ slug: string }> };
 
+/**
+ * Admin flag save. `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }`.
+ * `approvePublic: true` forces the Public teaser on; `denyPublic: true` turns the Public
+ * teaser and Landing full off. Omitted flags keep their value. Slug must be PACK_A or
+ * have a Neon row (R2 uploads are seeded when Admin lists them).
+ */
 export async function PATCH(req: Request, { params }: Params) {
   const { userId } = await auth();
   if (!userId) {
@@ -18,7 +24,7 @@ export async function PATCH(req: Request, { params }: Params) {
   }
 
   const { slug } = await params;
-  if (!getLibraryItem(slug)) {
+  if (!isValidLibrarySlug(slug)) {
     return NextResponse.json({ error: "Unknown library item" }, { status: 404 });
   }
 
@@ -34,7 +40,7 @@ export async function PATCH(req: Request, { params }: Params) {
     return NextResponse.json(
       {
         error:
-          "Body must include boolean downloadable and/or boolean teaserPublic",
+          "Body must include at least one boolean of downloadable, teaserPublic, landingFull, approvePublic: true or denyPublic: true (no contradictions, e.g. approvePublic with teaserPublic: false)",
       },
       { status: 400 },
     );
@@ -52,10 +58,14 @@ export async function PATCH(req: Request, { params }: Params) {
       slug: row.slug,
       downloadable: Boolean(row.downloadable),
       teaserPublic: Boolean(row.teaser_public),
+      landingFull: Boolean(row.landing_full),
       updated_at: row.updated_at,
       updated_by: row.updated_by,
     });
   } catch (e) {
+    if (e instanceof UnknownLibrarySlugError) {
+      return NextResponse.json({ error: "Unknown library item" }, { status: 404 });
+    }
     if (e instanceof Error && e.message === "database_not_configured") {
       return NextResponse.json(
         { error: "Database is not configured (NETLIFY_DATABASE_URL)." },

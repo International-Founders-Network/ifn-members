@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
-import { isLibraryItemDownloadable } from "@/lib/library-assets";
-import { getLibraryItem } from "@/lib/library-catalog";
+import { isLibraryItemDownloadable, resolveLibraryItem } from "@/lib/library-assets";
 import { isMemberEntitled } from "@/lib/membership";
 import { createSignedDownloadUrl } from "@/lib/storage";
 
@@ -15,7 +14,7 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   const { slug } = await params;
-  const item = getLibraryItem(slug);
+  const item = await resolveLibraryItem(slug);
   if (!item) {
     return NextResponse.json({ error: "Unknown library item" }, { status: 404 });
   }
@@ -52,6 +51,13 @@ export async function GET(_req: Request, { params }: Params) {
         error: "Download is not enabled for this file yet.",
         reason: "download_disabled",
       },
+      { status: 403 },
+    );
+  }
+
+  if (!item.objectKey) {
+    return NextResponse.json(
+      { error: "This file is not on R2 yet.", reason: "object_missing" },
       { status: 403 },
     );
   }
