@@ -554,7 +554,7 @@ describe("bulk flags", () => {
         { slugs: ["a", "b", "a"], patch: { approvePublic: true } },
         isValidLibrarySlug,
       ),
-    ).toEqual({ slugs: ["a", "b"], patch: { teaserPublic: true } });
+    ).toEqual({ slugs: ["a", "b"], patch: { teaserPublic: true, landingFull: false } });
 
     const tooMany = Array.from({ length: MAX_BULK_SLUGS + 1 }, (_, i) => `s${i}`);
     for (const body of [
@@ -570,7 +570,7 @@ describe("bulk flags", () => {
     }
   });
 
-  it("flips one flag for many slugs and keeps the others", async () => {
+  it("flips Public teaser on and clears Landing full (member download kept)", async () => {
     const neon = useFakeNeon([
       {
         slug: "cap-table-basics",
@@ -587,10 +587,11 @@ describe("bulk flags", () => {
       "admin@ifn.community",
     );
     expect(rows).toHaveLength(2);
+    // Prior landing_full:true is forced off; member download stays on.
     expect(neon.rows.get("cap-table-basics")).toMatchObject({
       downloadable: true,
       teaser_public: true,
-      landing_full: true,
+      landing_full: false,
       updated_by: "admin@ifn.community",
     });
     expect(neon.rows.get("visa-pathways")).toMatchObject({
@@ -598,6 +599,38 @@ describe("bulk flags", () => {
       teaser_public: true,
       landing_full: false,
     });
+  });
+
+  it("flips Landing full on and clears Public teaser (member download kept)", async () => {
+    const neon = useFakeNeon([
+      {
+        slug: "cap-table-basics",
+        downloadable: true,
+        teaser_public: true,
+        landing_full: false,
+        updated_at: "2026-09-21T00:00:00.000Z",
+        updated_by: null,
+      },
+    ]);
+    const rows = await setLibraryItemsFlags(
+      ["cap-table-basics"],
+      { landingFull: true },
+      "admin@ifn.community",
+    );
+    expect(rows).toHaveLength(1);
+    expect(neon.rows.get("cap-table-basics")).toMatchObject({
+      downloadable: true,
+      teaser_public: false,
+      landing_full: true,
+      updated_by: "admin@ifn.community",
+    });
+  });
+
+  it("rejects persisting both public flags ON", async () => {
+    useFakeNeon();
+    await expect(
+      setLibraryItemsFlags(["visa-pathways"], { teaserPublic: true, landingFull: true }, "a"),
+    ).rejects.toThrow("exclusive_public_flags");
   });
 
   it("accepts registry serials without a Neon row", async () => {

@@ -12,6 +12,7 @@ import {
   type LibraryObjectPresence,
 } from "@/lib/library-discover";
 import {
+  applyPublicFlagExclusivity,
   defaultLibraryFlagsMap,
   type LibraryAssetFlags,
   type LibraryFlagsPatch,
@@ -22,6 +23,7 @@ import { LIBRARY_SERIALS, serialForSlug } from "@/lib/library-serials";
  * `downloadable` = "member on" (column name kept from PR #1).
  * `teaser_public` = "teaser on" (landing teaser only; never unlocks the full PDF).
  * `landing_full` = "landing full" (landing may offer the full PDF publicly).
+ * Public teaser and Landing full are mutually exclusive; member download is independent.
  */
 export type LibraryAssetRow = {
   slug: string;
@@ -323,8 +325,10 @@ export class UnknownLibrarySlugError extends Error {
 
 /**
  * Upsert any subset of the three flags for one or many slugs in one statement. Omitted
- * flags keep their stored value (or default FALSE on first insert). Every slug must be
- * PACK_A, in the serial registry or already have a Neon row, else nothing is written. Does not touch R2.
+ * flags keep their stored value (or default FALSE on first insert). Public teaser and
+ * Landing full are mutually exclusive (turning one ON forces the other OFF); member
+ * download is independent. Every slug must be PACK_A, in the serial registry or already
+ * have a Neon row, else nothing is written. Does not touch R2.
  */
 export async function setLibraryItemsFlags(
   slugs: string[],
@@ -335,6 +339,12 @@ export async function setLibraryItemsFlags(
   if (!sql) {
     throw new Error("database_not_configured");
   }
+
+  const exclusive = applyPublicFlagExclusivity(patch);
+  if (!exclusive) {
+    throw new Error("exclusive_public_flags");
+  }
+  patch = exclusive;
 
   if (
     patch.downloadable === undefined &&

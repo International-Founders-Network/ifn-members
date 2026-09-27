@@ -9,8 +9,9 @@ import { parseLibraryBulkRequest } from "@/lib/library-flags";
  * Admin bulk flag save:
  * `{ slugs: string[], patch: { downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? } }`.
  *
- * - `approvePublic: true` ⇒ Public teaser ON for every slug.
+ * - `approvePublic: true` ⇒ Public teaser ON + Landing full OFF for every slug.
  * - `denyPublic: true` ⇒ Public teaser OFF and Landing full OFF (member download untouched).
+ * - Public teaser ON forces Landing full OFF (and vice versa). Member download independent.
  * - Omitted flags keep their stored value per slug. Max 100 slugs.
  *
  * All-or-nothing: one unknown slug (not PACK_A, no Neon row) ⇒ 404 and nothing is written.

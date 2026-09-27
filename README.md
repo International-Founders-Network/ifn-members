@@ -123,19 +123,19 @@ Order: Pack A first, then the rest alphabetically.
 
 ### Asset flags (Admin)
 
-Neon table `library_assets` stores three independent per-slug flags, all default **false** (missing row = all off). Off always wins for that surface.
+Neon table `library_assets` stores three per-slug flags, all default **false** (missing row = all off). Off always wins for that surface. **Public teaser** and **Landing full download** are mutually exclusive (turning one ON forces the other OFF). **Member download** is independent.
 
 | Admin control | Column | API field | Surface |
 | --- | --- | --- | --- |
 | **Member download** | `downloadable` | `downloadable` | Entitled members download the full PDF on members.ifn.community |
-| **Public teaser** | `teaser_public` | `teaserPublic` | Landing may offer the teaser only; never unlocks a full PDF |
-| **Landing full download** | `landing_full` | `landingFull` | Landing may offer the full PDF to anyone, no sign-in |
+| **Public teaser** | `teaser_public` | `teaserPublic` | Landing may offer the teaser only; never unlocks a full PDF; mutually exclusive with Landing full |
+| **Landing full download** | `landing_full` | `landingFull` | Landing may offer the full PDF to anyone, no sign-in; mutually exclusive with Public teaser |
 
-**Approve public** is the primary Admin action. It sends `{ "approvePublic": true }`, which turns **Public teaser ON** automatically. The teaser can still be switched off afterward. It does not touch Member download or Landing full download.
+**Approve public** is the primary Admin action. It sends `{ "approvePublic": true }`, which turns **Public teaser ON** and **Landing full OFF**. The teaser can still be switched off afterward. It does not touch Member download.
 
 **Deny public** sends `{ "denyPublic": true }`, which turns **Public teaser OFF and Landing full download OFF** (clears both public surfaces). Member download is untouched.
 
-`PATCH /api/admin/library/[slug]/flags` accepts `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }` (booleans; at least one flag must result). Omitted flags keep their stored value (COALESCE upsert), so saving one flag never wipes the others. Contradictions are rejected (400): `approvePublic` + `teaserPublic: false`, `denyPublic` + `teaserPublic: true` or `landingFull: true`, `approvePublic` + `denyPublic`. `approvePublic: false` / `denyPublic: false` are no-ops. Unknown slug (not Pack A, not in the registry, no Neon row) ⇒ 404. The response always returns all three flags:
+`PATCH /api/admin/library/[slug]/flags` accepts `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }` (booleans; at least one flag must result). Omitted flags keep their stored value (COALESCE upsert), except that turning Public teaser ON also writes Landing full OFF (and vice versa). Contradictions are rejected (400): `approvePublic` + `teaserPublic: false`, `denyPublic` + `teaserPublic: true` or `landingFull: true`, `approvePublic` + `denyPublic`, both public flags `true` in one patch. `approvePublic: false` / `denyPublic: false` are no-ops. Unknown slug (not Pack A, not in the registry, no Neon row) ⇒ 404. The response always returns all three flags:
 
 ```json
 { "slug": "visa-pathways", "downloadable": false, "teaserPublic": true, "landingFull": false, "updated_at": "...", "updated_by": "..." }
@@ -151,11 +151,11 @@ Each card has a select checkbox (selected cards get an ink ring). **Select all f
 
 | Button | Patch sent |
 | --- | --- |
-| **Approve public** | `{ "approvePublic": true }` ⇒ Public teaser ON |
+| **Approve public** | `{ "approvePublic": true }` ⇒ Public teaser ON + Landing full OFF |
 | **Deny public** | `{ "denyPublic": true }` ⇒ Public teaser OFF + Landing full OFF |
 | Member download **On / Off** | `{ "downloadable": true \| false }` |
-| Public teaser **On / Off** | `{ "teaserPublic": true \| false }` |
-| Landing full **On / Off** | `{ "landingFull": true \| false }` |
+| Public teaser **On / Off** | `{ "teaserPublic": true \| false }` (ON also clears Landing full) |
+| Landing full **On / Off** | `{ "landingFull": true \| false }` (ON also clears Public teaser) |
 
 Every bulk action asks for confirmation. Per-card switches are unchanged.
 

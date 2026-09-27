@@ -45,10 +45,13 @@ export default async function AdminLibraryPage() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>
         <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
-          Three independent per-file flags for every library asset, all{" "}
-          <strong>off</strong> by default (a file with no saved row is fully off).
-          Off always wins for that surface. Every serial in the registry, and every
-          file Content uploads to R2 as{" "}
+          Per-file flags for every library asset, all <strong>off</strong> by
+          default (a file with no saved row is fully off). Off always wins for that
+          surface. <strong>Public teaser</strong> and{" "}
+          <strong>Landing full download</strong> are mutually exclusive — turning
+          one on turns the other off. <strong>Member download</strong> is
+          independent. Every serial in the registry, and every file Content uploads
+          to R2 as{" "}
           <code className="text-sm">library/&lt;NNN&gt;-&lt;slug&gt;/v1.1-member-&lt;slug&gt;.pdf</code>,{" "}
           <code className="text-sm">v1.1-teaser-&lt;slug&gt;.pdf</code> or{" "}
           <code className="text-sm">v1.1-&lt;slug&gt;.xlsx</code>, shows up here on the next load,
@@ -57,8 +60,8 @@ export default async function AdminLibraryPage() {
         <ul className="mt-3 list-disc space-y-1 pl-5 text-[var(--ink-muted)] leading-relaxed">
           <li>
             <strong className="text-[var(--ink)]">Approve public</strong> is the
-            primary action: it turns <strong>Public teaser</strong> ON
-            automatically. You can switch the teaser off afterward.
+            primary action: it turns <strong>Public teaser</strong> ON and{" "}
+            <strong>Landing full</strong> OFF. You can switch the teaser off afterward.
           </li>
           <li>
             <strong className="text-[var(--ink)]">Bulk</strong>: tick files (or{" "}
@@ -68,15 +71,18 @@ export default async function AdminLibraryPage() {
           </li>
           <li>
             <strong className="text-[var(--ink)]">Public teaser</strong>: landing
-            may offer the teaser only. It never unlocks the full PDF.
+            may offer the teaser only. Mutually exclusive with Landing full; never
+            unlocks the full PDF.
           </li>
           <li>
             <strong className="text-[var(--ink)]">Member download</strong>:
-            entitled members download the full PDF here.
+            entitled members download the full PDF here (independent of the public
+            flags).
           </li>
           <li>
             <strong className="text-[var(--ink)]">Landing full download</strong>:
-            anyone on ifn.community may download the full PDF, no sign-in.
+            anyone on ifn.community may download the full PDF, no sign-in. Mutually
+            exclusive with Public teaser.
           </li>
         </ul>
         <p className="mt-3 text-[var(--ink-muted)] leading-relaxed">

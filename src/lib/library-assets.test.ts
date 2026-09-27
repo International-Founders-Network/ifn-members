@@ -12,6 +12,7 @@ import {
 import {
   buildPublicLibraryCatalog,
   defaultLibraryFlagsMap,
+  applyPublicFlagExclusivity,
   parseLibraryFlagsPatch,
   type LibraryAssetFlags,
 } from "./library-flags";
@@ -148,31 +149,44 @@ describe("Pack A flags", () => {
     expect(canMemberDownload(false, flags, "entity-selection")).toBe(false);
   });
 
-  it("parses Admin patches for either or both flags", () => {
+  it("parses Admin patches and enforces public-flag exclusivity", () => {
     expect(parseLibraryFlagsPatch({ downloadable: true })).toEqual({ downloadable: true });
     expect(parseLibraryFlagsPatch({ teaserPublic: false })).toEqual({ teaserPublic: false });
     expect(parseLibraryFlagsPatch({ downloadable: false, teaserPublic: true })).toEqual({
       downloadable: false,
       teaserPublic: true,
+      landingFull: false,
     });
-    expect(parseLibraryFlagsPatch({ landingFull: true })).toEqual({ landingFull: true });
-    // Patching one flag never carries a value for the others.
-    expect(parseLibraryFlagsPatch({ teaserPublic: true })).not.toHaveProperty("downloadable");
+    // Turning one public surface ON forces the other OFF.
+    expect(parseLibraryFlagsPatch({ teaserPublic: true })).toEqual({
+      teaserPublic: true,
+      landingFull: false,
+    });
+    expect(parseLibraryFlagsPatch({ landingFull: true })).toEqual({
+      landingFull: true,
+      teaserPublic: false,
+    });
+    // Turning either OFF alone leaves the other unset.
     expect(parseLibraryFlagsPatch({ landingFull: false })).toEqual({ landingFull: false });
+    expect(parseLibraryFlagsPatch({ teaserPublic: false })).not.toHaveProperty("landingFull");
     expect(Object.keys(parseLibraryFlagsPatch({ downloadable: true })!)).toEqual([
       "downloadable",
     ]);
+    // Both public ON in one patch is a contradiction.
+    expect(parseLibraryFlagsPatch({ teaserPublic: true, landingFull: true })).toBeNull();
   });
 
-  it("approvePublic turns the Public teaser on and touches nothing else", () => {
-    expect(parseLibraryFlagsPatch({ approvePublic: true })).toEqual({ teaserPublic: true });
+  it("approvePublic turns Public teaser on and Landing full off", () => {
+    expect(parseLibraryFlagsPatch({ approvePublic: true })).toEqual({
+      teaserPublic: true,
+      landingFull: false,
+    });
     expect(parseLibraryFlagsPatch({ approvePublic: true, teaserPublic: true })).toEqual({
       teaserPublic: true,
+      landingFull: false,
     });
-    expect(parseLibraryFlagsPatch({ approvePublic: true, landingFull: true })).toEqual({
-      teaserPublic: true,
-      landingFull: true,
-    });
+    // Approve + landingFull:true is a contradiction (teaser vs full).
+    expect(parseLibraryFlagsPatch({ approvePublic: true, landingFull: true })).toBeNull();
     // Teaser can still be turned off afterward with a plain patch.
     expect(parseLibraryFlagsPatch({ teaserPublic: false })).toEqual({ teaserPublic: false });
   });
@@ -184,6 +198,20 @@ describe("Pack A flags", () => {
     expect(parseLibraryFlagsPatch({ approvePublic: false, downloadable: true })).toEqual({
       downloadable: true,
     });
+  });
+
+  it("applyPublicFlagExclusivity clears the other public flag", () => {
+    expect(applyPublicFlagExclusivity({ teaserPublic: true })).toEqual({
+      teaserPublic: true,
+      landingFull: false,
+    });
+    expect(applyPublicFlagExclusivity({ landingFull: true })).toEqual({
+      landingFull: true,
+      teaserPublic: false,
+    });
+    expect(applyPublicFlagExclusivity({ teaserPublic: true, landingFull: true })).toBeNull();
+    expect(applyPublicFlagExclusivity({ downloadable: true })).toEqual({ downloadable: true });
+    expect(applyPublicFlagExclusivity({ teaserPublic: false })).toEqual({ teaserPublic: false });
   });
 
   it("rejects empty or non-boolean patches", () => {
