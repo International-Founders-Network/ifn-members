@@ -10,15 +10,13 @@ import {
   ShieldOff,
 } from "lucide-react";
 import {
-  FilterChips,
-  LibrarySearch,
   NoMatch,
   OUTLINE_BUTTON,
   PILL_NEUTRAL,
   PILL_OFF,
   PILL_ON,
   ResourceCard,
-  ResultCount,
+  ResourceFilters,
   SELECTION,
   TEXT_LINK,
 } from "@ifn/ui";
@@ -320,42 +318,36 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <LibrarySearch
-          id="admin-library-search"
-          label="Search library files by title or slug"
-          placeholder="Search by title or slug"
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
-        <FilterChips
-          label="Filter by status"
-          options={statusOptions}
-          value={status}
-          onChange={setStatus}
-        />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <ResultCount shown={visible.length} isFiltered={isFiltered} />
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={selectAllVisible}
-              disabled={visible.length === 0 || allVisibleSelected}
-              className={OUTLINE_BUTTON}
-            >
-              Select all {isFiltered ? "filtered" : "shown"} ({visible.length})
-            </button>
-            <button
-              type="button"
-              onClick={clearSelection}
-              disabled={selected.size === 0}
-              className={OUTLINE_BUTTON}
-            >
-              Clear selection
-            </button>
-          </div>
+      <ResourceFilters
+        search={{
+          id: "admin-library-search",
+          label: "Search library files by title or slug",
+          placeholder: "Search by title or slug",
+          value: searchQuery,
+          onChange: setSearchQuery,
+        }}
+        chips={{ label: "Filter by status", options: statusOptions, value: status, onChange: setStatus }}
+        count={{ shown: visible.length, isFiltered }}
+      >
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={selectAllVisible}
+            disabled={visible.length === 0 || allVisibleSelected}
+            className={OUTLINE_BUTTON}
+          >
+            Select all {isFiltered ? "filtered" : "shown"} ({visible.length})
+          </button>
+          <button
+            type="button"
+            onClick={clearSelection}
+            disabled={selected.size === 0}
+            className={OUTLINE_BUTTON}
+          >
+            Clear selection
+          </button>
         </div>
-      </div>
+      </ResourceFilters>
 
       {notice ? (
         <p
