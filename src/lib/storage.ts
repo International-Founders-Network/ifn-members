@@ -50,18 +50,53 @@ const NOT_CONFIGURED_REASON =
  * Create a short-lived signed GET URL for a private library object.
  * Returns 503-shaped result when storage env is missing (never invent a public URL).
  */
-/**
- * `attachment; filename="v1.1-member-visa-pathways.pdf"`: the saved file keeps the
- * object's basename (slug included). Non-safe ASCII is replaced with `_`.
- */
-export function attachmentDisposition(objectKey: string): string {
+export type ContentDispositionMode = "inline" | "attachment";
+
+function safeObjectBasename(objectKey: string): string {
   const basename = objectKey.split("/").pop() || "download";
-  return `attachment; filename="${basename.replace(/[^A-Za-z0-9._-]/g, "_")}"`;
+  return basename.replace(/[^A-Za-z0-9._-]/g, "_");
 }
+
+/**
+ * `attachment|inline; filename="v1.1-member-visa-pathways.pdf"`: basename keeps the
+ * object name (slug included). Non-safe ASCII is replaced with `_`.
+ * Use `attachment` for Download links; `inline` so Preview / open-in-tab opens the PDF.
+ */
+export function contentDisposition(
+  objectKey: string,
+  disposition: ContentDispositionMode = "attachment",
+): string {
+  return `${disposition}; filename="${safeObjectBasename(objectKey)}"`;
+}
+
+/** Download-oriented Content-Disposition (basename from object key). */
+export function attachmentDisposition(objectKey: string): string {
+  return contentDisposition(objectKey, "attachment");
+}
+
+/** Preview-oriented Content-Disposition (browser may render PDF in-tab). */
+export function inlineDisposition(objectKey: string): string {
+  return contentDisposition(objectKey, "inline");
+}
+
+/** Response Content-Type override so inline PDF/xlsx open with the right viewer. */
+export function responseContentType(objectKey: string): string | undefined {
+  const lower = objectKey.toLowerCase();
+  if (lower.endsWith(".pdf")) return "application/pdf";
+  if (lower.endsWith(".xlsx")) {
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  }
+  return undefined;
+}
+
+export type SignedUrlOptions = {
+  disposition?: ContentDispositionMode;
+};
 
 export async function createSignedDownloadUrl(
   objectKey: string,
   expiresIn: number = DEFAULT_EXPIRES,
+  options: SignedUrlOptions = {},
 ): Promise<SignedUrlResult> {
   if (!r2Configured()) {
     return {
@@ -81,10 +116,13 @@ export async function createSignedDownloadUrl(
     };
   }
 
+  const disposition = options.disposition ?? "attachment";
+  const contentType = responseContentType(objectKey);
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: objectKey,
-    ResponseContentDisposition: attachmentDisposition(objectKey),
+    ResponseContentDisposition: contentDisposition(objectKey, disposition),
+    ...(contentType ? { ResponseContentType: contentType } : {}),
   });
 
   const url = await getSignedUrl(client, command, { expiresIn });
@@ -111,6 +149,7 @@ function isNotFound(error: unknown): boolean {
 export async function createSignedUrlForExistingObject(
   objectKey: string,
   expiresIn: number = SHORT_SIGNED_URL_EXPIRES,
+  options: SignedUrlOptions = {},
 ): Promise<ExistingObjectUrlResult> {
   const client = getR2Client();
   if (!client) {
@@ -147,7 +186,7 @@ export async function createSignedUrlForExistingObject(
     };
   }
 
-  const signed = await createSignedDownloadUrl(objectKey, expiresIn);
+  const signed = await createSignedDownloadUrl(objectKey, expiresIn, options);
   return signed.ok
     ? signed
     : { ok: false, status: 503, error: signed.reason, reason: "storage_not_configured" };
