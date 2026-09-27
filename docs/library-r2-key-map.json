@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26T20:10:00-05:00",
+  "generated": "2026-09-26T20:15:00-05:00",
   "scheme": "library/<NNN>-<slug>/v1.1-member-<slug>.pdf | v1.1-teaser-<slug>.pdf | v1.1-<slug>.xlsx",
   "bucket": "ifn-pdfs",
   "doc_version": "v1.1",
@@ -3709,6 +3709,7 @@
     "scheme_live": "library/<NNN>-<slug>/v1.1-member-<slug>.pdf | v1.1-teaser-<slug>.pdf | v1.1-<slug>.xlsx",
     "members_pr": "https://github.com/International-Founders-Network/ifn-members/pull/3",
     "members_commit_pre_slug": "efb23d4192b0bbf4fb74ccb71d80e5f7c80c2ad5",
-    "note": "Object rename only; folder library/<NNN>-<slug>/ unchanged. Download basename = object basename."
+    "note": "Object rename only; folder library/<NNN>-<slug>/ unchanged. Download basename = object basename.",
+    "members_commit": "a6c63cc9fa6b3daccd272dac4a606f6fd52502fd"
   }
 }
