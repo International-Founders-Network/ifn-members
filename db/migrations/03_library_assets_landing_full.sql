@@ -1,5 +1,6 @@
 -- Pack A "landing full" flag: landing may offer the FULL PDF publicly (no sign-in).
--- Independent of downloadable ("member on") and teaser_public ("teaser on").
+-- Independent of downloadable ("member on"). Mutually exclusive with teaser_public
+-- ("teaser on"): Admin/API cannot leave both public flags ON.
 -- Defaults FALSE; missing row = all three off. Off always wins for that surface.
 -- App also runs this ALTER in ensureLibraryAssetsTable() so Netlify works without a manual migrate.
 

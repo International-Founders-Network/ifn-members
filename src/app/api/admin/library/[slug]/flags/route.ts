@@ -9,9 +9,11 @@ type Params = { params: Promise<{ slug: string }> };
 
 /**
  * Admin flag save. `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }`.
- * `approvePublic: true` forces the Public teaser on; `denyPublic: true` turns the Public
- * teaser and Landing full off. Omitted flags keep their value. Slug must be PACK_A or
- * have a Neon row (R2 uploads are seeded when Admin lists them).
+ * `approvePublic: true` forces Public teaser ON and Landing full OFF; `denyPublic: true`
+ * turns both public surfaces off. Public teaser and Landing full are mutually exclusive
+ * (turning one ON forces the other OFF). Member download is independent. Omitted flags
+ * keep their value. Slug must be PACK_A or have a Neon row (R2 uploads are seeded when
+ * Admin lists them).
  */
 export async function PATCH(req: Request, { params }: Params) {
   const { userId } = await auth();

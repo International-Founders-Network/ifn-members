@@ -9,6 +9,8 @@ Shared Neon project with the landing site (`memberships` and other landing table
   - `downloadable` — member full download (`01_library_assets.sql`)
   - `teaser_public` — landing teaser download (`02_library_assets_teaser_public.sql`)
   - `landing_full` — landing full download (`03_library_assets_landing_full.sql`)
+  - Public teaser and Landing full are mutually exclusive in Admin/API writes;
+    Member download (`downloadable`) is independent.
 
   The members app also ensures the table and columns exist on first Admin Library /
   download check (`CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS`).

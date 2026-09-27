@@ -5,6 +5,9 @@ import { PACK_A, type LibraryItem } from "@/lib/library-catalog";
  * - downloadable ("member on"): entitled members may download the full PDF here.
  * - teaserPublic ("teaser on"): landing may offer the teaser only. Never unlocks the full PDF.
  * - landingFull ("landing full"): landing may offer the full PDF publicly, no sign-in.
+ *
+ * Public teaser and Landing full are mutually exclusive: turning one ON forces the
+ * other OFF. Member download stays independent.
  */
 export type LibraryAssetFlags = {
   downloadable: boolean;
@@ -31,17 +34,39 @@ export function defaultLibraryFlagsMap(): Record<string, LibraryAssetFlags> {
 }
 
 /**
+ * Public teaser and Landing full cannot both be ON. Turning one ON forces the other
+ * OFF in the returned patch. Returns null when the patch asks for both ON.
+ * Member download is never touched by this helper.
+ */
+export function applyPublicFlagExclusivity(
+  patch: LibraryFlagsPatch,
+): LibraryFlagsPatch | null {
+  if (patch.teaserPublic === true && patch.landingFull === true) {
+    return null;
+  }
+  const next: LibraryFlagsPatch = { ...patch };
+  if (next.teaserPublic === true) {
+    next.landingFull = false;
+  } else if (next.landingFull === true) {
+    next.teaserPublic = false;
+  }
+  return next;
+}
+
+/**
  * Validate an Admin PATCH body:
  * `{ downloadable?, teaserPublic?, landingFull?, approvePublic?, denyPublic? }` (all
  * boolean), resolving to at least one flag. Returns null when invalid.
  *
  * - `approvePublic: true` is the primary Admin action and forces `teaserPublic: true`
- *   (the teaser can still be turned off by a later patch).
+ *   and `landingFull: false` (the teaser can still be turned off by a later patch).
  * - `denyPublic: true` clears both public surfaces: `teaserPublic: false` and
  *   `landingFull: false`. Member download is untouched.
+ * - Turning Public teaser ON forces Landing full OFF (and vice versa). Both OFF is fine.
  *
  * Contradictions (approve + `teaserPublic: false`, deny + a public flag `true`,
- * approve + deny) are rejected. `approvePublic: false` / `denyPublic: false` are no-ops.
+ * approve + deny, both public flags true in one patch) are rejected.
+ * `approvePublic: false` / `denyPublic: false` are no-ops.
  */
 export function parseLibraryFlagsPatch(body: unknown): LibraryFlagsPatch | null {
   if (typeof body !== "object" || body === null) return null;
@@ -75,7 +100,7 @@ export function parseLibraryFlagsPatch(body: unknown): LibraryFlagsPatch | null 
   }
 
   if (FLAG_KEYS.every((key) => patch[key] === undefined)) return null;
-  return patch;
+  return applyPublicFlagExclusivity(patch);
 }
 
 /** Most slugs one bulk request may touch. */

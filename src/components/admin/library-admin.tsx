@@ -54,9 +54,9 @@ const BULK_ACTIONS: Array<{
 }> = [
   { id: "member-on", group: "Member download", label: "On", confirm: "turn Member download ON", patch: { downloadable: true } },
   { id: "member-off", group: "Member download", label: "Off", confirm: "turn Member download OFF", patch: { downloadable: false } },
-  { id: "teaser-on", group: "Public teaser", label: "On", confirm: "turn Public teaser ON", patch: { teaserPublic: true } },
+  { id: "teaser-on", group: "Public teaser", label: "On", confirm: "turn Public teaser ON (turns Landing full OFF)", patch: { teaserPublic: true } },
   { id: "teaser-off", group: "Public teaser", label: "Off", confirm: "turn Public teaser OFF", patch: { teaserPublic: false } },
-  { id: "landing-on", group: "Landing full", label: "On", confirm: "turn Landing full download ON (anyone can download the full PDF)", patch: { landingFull: true } },
+  { id: "landing-on", group: "Landing full", label: "On", confirm: "turn Landing full download ON (turns Public teaser OFF; anyone can download the full PDF)", patch: { landingFull: true } },
   { id: "landing-off", group: "Landing full", label: "Off", confirm: "turn Landing full download OFF", patch: { landingFull: false } },
 ];
 
@@ -483,7 +483,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                       <span>
                         <span className="block font-semibold">Approved for public</span>
                         <span className="block text-xs leading-relaxed text-[var(--ink-muted)]">
-                          Public teaser is on. Switch it off below to withdraw.
+                          Public teaser is on (Landing full stays off). Switch teaser off below to withdraw.
                         </span>
                       </span>
                     </p>
@@ -498,7 +498,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                       <span>
                         <span className="block text-sm font-semibold">Approve public</span>
                         <span className="block text-xs leading-relaxed text-white/85">
-                          Turns Public teaser ON. You can switch it off afterward.
+                          Turns Public teaser ON and Landing full OFF. You can switch the teaser off afterward.
                         </span>
                       </span>
                     </button>
@@ -507,7 +507,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                   <FlagSwitch
                     id={`${item.slug}-teaser`}
                     label="Public teaser"
-                    description="Landing may offer the teaser PDF. Never unlocks the full PDF."
+                    description="Landing may offer the teaser PDF. Mutually exclusive with Landing full — turning this on turns Landing full off."
                     checked={item.teaserPublic}
                     disabled={busy}
                     onChange={(next) => void save(item.slug, { teaserPublic: next })}
@@ -523,7 +523,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                   <FlagSwitch
                     id={`${item.slug}-landing-full`}
                     label="Landing full download"
-                    description="Anyone on ifn.community may download the full PDF, no sign-in."
+                    description="Anyone on ifn.community may download the full PDF, no sign-in. Mutually exclusive with Public teaser — turning this on turns Public teaser off."
                     checked={item.landingFull}
                     disabled={busy}
                     onChange={(next) => void save(item.slug, { landingFull: next })}
@@ -564,7 +564,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
               type="button"
               disabled={bulkPending}
               onClick={() =>
-                void bulkSave({ approvePublic: true }, "Approve public (Public teaser ON)")
+                void bulkSave({ approvePublic: true }, "Approve public (Public teaser ON, Landing full OFF)")
               }
               className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--crimson)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus}`}
             >
