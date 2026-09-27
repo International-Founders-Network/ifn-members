@@ -18,13 +18,13 @@ export type LibraryItem = {
   /** `pdf` = member + teaser PDFs; `xlsx` = workbook only. */
   kind: LibraryAssetKind;
   /**
-   * Private member deliverable in R2: `…/v1.1-member.pdf`, or `…/v1.1.xlsx` for
+   * Private member deliverable in R2: `…/v1.1-member-<slug>.pdf`, or `…/v1.1-<slug>.xlsx` for
    * workbook-only assets. Null when the serial folder is unknown.
    */
   objectKey: string | null;
-  /** `…/v1.1-teaser.pdf`; null for workbook-only assets or an unknown folder. */
+  /** `…/v1.1-teaser-<slug>.pdf`; null for workbook-only assets or an unknown folder. */
   teaserObjectKey: string | null;
-  /** `…/v1.1.xlsx` for workbook assets or a PDF with a workbook on R2; else null. */
+  /** `…/v1.1-<slug>.xlsx` for workbook assets or a PDF with a workbook on R2; else null. */
   xlsxObjectKey: string | null;
 };
 
@@ -40,8 +40,8 @@ export const PACK_A: LibraryItem[] = [
     tag: "Guide",
     nnn: "001",
     kind: "pdf",
-    objectKey: "library/001-visa-pathways/v1.1-member.pdf",
-    teaserObjectKey: "library/001-visa-pathways/v1.1-teaser.pdf",
+    objectKey: "library/001-visa-pathways/v1.1-member-visa-pathways.pdf",
+    teaserObjectKey: "library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf",
     xlsxObjectKey: null,
   },
   {
@@ -51,8 +51,8 @@ export const PACK_A: LibraryItem[] = [
     tag: "Guide",
     nnn: "002",
     kind: "pdf",
-    objectKey: "library/002-entity-selection/v1.1-member.pdf",
-    teaserObjectKey: "library/002-entity-selection/v1.1-teaser.pdf",
+    objectKey: "library/002-entity-selection/v1.1-member-entity-selection.pdf",
+    teaserObjectKey: "library/002-entity-selection/v1.1-teaser-entity-selection.pdf",
     xlsxObjectKey: null,
   },
   {
@@ -62,8 +62,8 @@ export const PACK_A: LibraryItem[] = [
     tag: "Guide",
     nnn: "003",
     kind: "pdf",
-    objectKey: "library/003-austin-ecosystem-map/v1.1-member.pdf",
-    teaserObjectKey: "library/003-austin-ecosystem-map/v1.1-teaser.pdf",
+    objectKey: "library/003-austin-ecosystem-map/v1.1-member-austin-ecosystem-map.pdf",
+    teaserObjectKey: "library/003-austin-ecosystem-map/v1.1-teaser-austin-ecosystem-map.pdf",
     xlsxObjectKey: null,
   },
 ];
@@ -90,28 +90,28 @@ function resolveSerial(slug: string, nnn?: string | null): string | null {
 }
 
 /**
- * Full member PDF: `library/<NNN>-<slug>/v1.1-member.pdf`. The serial comes from
+ * Full member PDF: `library/<NNN>-<slug>/v1.1-member-<slug>.pdf`. The serial comes from
  * `LIBRARY_SERIALS`; pass `nnn` (from discovery) for slugs outside the registry.
  * Null when neither knows the folder.
  */
 export function fullObjectKey(slug: string, nnn?: string | null): string | null {
   const serial = resolveSerial(slug, nnn);
-  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}-member.pdf` : null;
+  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}-member-${slug}.pdf` : null;
 }
 
 /**
- * Teaser PDF: `library/<NNN>-<slug>/v1.1-teaser.pdf`. Served publicly by
+ * Teaser PDF: `library/<NNN>-<slug>/v1.1-teaser-<slug>.pdf`. Served publicly by
  * `/api/public/library/[slug]/teaser` only while `teaser_public` is on.
  */
 export function teaserObjectKey(slug: string, nnn?: string | null): string | null {
   const serial = resolveSerial(slug, nnn);
-  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}-teaser.pdf` : null;
+  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}-teaser-${slug}.pdf` : null;
 }
 
-/** Workbook: `library/<NNN>-<slug>/v1.1.xlsx`. */
+/** Workbook: `library/<NNN>-<slug>/v1.1-<slug>.xlsx` (no teaser twin). */
 export function xlsxObjectKey(slug: string, nnn?: string | null): string | null {
   const serial = resolveSerial(slug, nnn);
-  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}.xlsx` : null;
+  return serial ? `${libraryFolder(serial, slug)}/${LIBRARY_DOC_VERSION}-${slug}.xlsx` : null;
 }
 
 /** `austin-ecosystem-map` → `Austin ecosystem map` (sentence case, like PACK_A titles). */

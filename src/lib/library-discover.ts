@@ -21,18 +21,22 @@ export type LibraryObjectKind = "full" | "teaser" | "xlsx";
 const VERSION = LIBRARY_DOC_VERSION.replace(/\./g, "\\.");
 const FOLDER = String.raw`^library/(\d{3})-([^/]+)/`;
 
-/** `^library/(\d{3})-([^/]+)/v1\.1-member\.pdf$` etc. (version from LIBRARY_DOC_VERSION). */
+/**
+ * `^library/(\d{3})-([^/]+)/v1\.1-member-\2\.pdf$` etc. (version from LIBRARY_DOC_VERSION).
+ * The `\2` backreference requires the filename slug to equal the folder slug.
+ */
 const KEY_PATTERNS: Array<[LibraryObjectKind, RegExp]> = [
-  ["full", new RegExp(`${FOLDER}${VERSION}-member\\.pdf$`)],
-  ["teaser", new RegExp(`${FOLDER}${VERSION}-teaser\\.pdf$`)],
-  ["xlsx", new RegExp(`${FOLDER}${VERSION}\\.xlsx$`)],
+  ["full", new RegExp(`${FOLDER}${VERSION}-member-\\2\\.pdf$`)],
+  ["teaser", new RegExp(`${FOLDER}${VERSION}-teaser-\\2\\.pdf$`)],
+  ["xlsx", new RegExp(`${FOLDER}${VERSION}-\\2\\.xlsx$`)],
 ];
 
 /**
- * `library/<NNN>-<slug>/v1.1-member.pdf` → full, `…/v1.1-teaser.pdf` → teaser,
- * `…/v1.1.xlsx` → xlsx (lowercase extensions, so keys stay derivable from the slug).
- * Legacy flat keys (`library/<slug>.pdf`, `library/teasers/…`, `pack-a/…`), other
- * versions, deeper folders and unsafe slugs are ignored (null).
+ * `library/<NNN>-<slug>/v1.1-member-<slug>.pdf` → full, `…/v1.1-teaser-<slug>.pdf` →
+ * teaser, `…/v1.1-<slug>.xlsx` → xlsx (lowercase extensions, so keys stay derivable from
+ * the slug). Bare basenames (`v1.1-member.pdf`), a filename slug that differs from the
+ * folder slug, legacy flat keys (`library/<slug>.pdf`, `library/teasers/…`, `pack-a/…`),
+ * other versions, deeper folders and unsafe slugs are ignored (null).
  */
 export function classifyLibraryObjectKey(
   key: string,

@@ -50,6 +50,15 @@ const NOT_CONFIGURED_REASON =
  * Create a short-lived signed GET URL for a private library object.
  * Returns 503-shaped result when storage env is missing (never invent a public URL).
  */
+/**
+ * `attachment; filename="v1.1-member-visa-pathways.pdf"`: the saved file keeps the
+ * object's basename (slug included). Non-safe ASCII is replaced with `_`.
+ */
+export function attachmentDisposition(objectKey: string): string {
+  const basename = objectKey.split("/").pop() || "download";
+  return `attachment; filename="${basename.replace(/[^A-Za-z0-9._-]/g, "_")}"`;
+}
+
 export async function createSignedDownloadUrl(
   objectKey: string,
   expiresIn: number = DEFAULT_EXPIRES,
@@ -75,6 +84,7 @@ export async function createSignedDownloadUrl(
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: objectKey,
+    ResponseContentDisposition: attachmentDisposition(objectKey),
   });
 
   const url = await getSignedUrl(client, command, { expiresIn });

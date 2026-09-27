@@ -14,8 +14,8 @@ Shared Neon project with the landing site (`memberships` and other landing table
   download check (`CREATE TABLE IF NOT EXISTS` + `ADD COLUMN IF NOT EXISTS`).
 
 `slug` is always the bare slug (`visa-pathways`), never the R2 serial folder
-(`001-visa-pathways`). R2 keys are `library/<NNN>-<slug>/v1.1-member.pdf`,
-`v1.1-teaser.pdf` and `v1.1.xlsx`; serials live in `src/lib/library-serials.ts` and
+(`001-visa-pathways`). R2 keys are `library/<NNN>-<slug>/v1.1-member-<slug>.pdf`,
+`v1.1-teaser-<slug>.pdf` and `v1.1-<slug>.xlsx`; serials live in `src/lib/library-serials.ts` and
 `docs/library-r2-key-map.json` (see the root README).
 
 Admin Library also **seeds** a row (all flags `false`, `updated_by` NULL) for every

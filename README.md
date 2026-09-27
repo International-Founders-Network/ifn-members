@@ -86,14 +86,15 @@ Paste names from `/workspace/ifn-copy/2026-09-25-ifn-members-env-checklist.md` (
 Content uploads to private R2 at any time; this app only lists and serves. Every asset has one **serial folder**, and the document version is in the filename:
 
 ```
-library/<NNN>-<slug>/v1.1-member.pdf   full member PDF
-library/<NNN>-<slug>/v1.1-teaser.pdf   public teaser PDF
-library/<NNN>-<slug>/v1.1.xlsx         workbook
+library/<NNN>-<slug>/v1.1-member-<slug>.pdf   full member PDF
+library/<NNN>-<slug>/v1.1-teaser-<slug>.pdf   public teaser PDF
+library/<NNN>-<slug>/v1.1-<slug>.xlsx         workbook (no teaser twin)
 ```
 
 - `NNN` is zero-padded to 3 digits and shared by the member PDF, teaser and workbook of one asset. Pack A is `001` visa-pathways, `002` entity-selection, `003` austin-ecosystem-map; `004`–`108` are the remaining seed ids sorted A→Z (108 assets: 93 PDF, 15 workbook-only).
 - The registry lives in `src/lib/library-serials.ts` (`LIBRARY_SERIALS`, `serialForSlug`, `LIBRARY_DOC_VERSION = "v1.1"`); the full old → new key map is [`docs/library-r2-key-map.json`](docs/library-r2-key-map.json). New assets take the next free serial (`109`, …) and should be added to both.
-- Key builders (`src/lib/library-catalog.ts`): `fullObjectKey(slug)`, `teaserObjectKey(slug)`, `xlsxObjectKey(slug)` derive keys from the registry serial (or an `nnn` passed from discovery for slugs outside it) and return `null` when neither knows the folder. E.g. `fullObjectKey("visa-pathways")` → `library/001-visa-pathways/v1.1-member.pdf`, `xlsxObjectKey("biz-plan-builder")` → `library/008-biz-plan-builder/v1.1.xlsx`.
+- Key builders (`src/lib/library-catalog.ts`): `fullObjectKey(slug)`, `teaserObjectKey(slug)`, `xlsxObjectKey(slug)` derive keys from the registry serial (or an `nnn` passed from discovery for slugs outside it) and return `null` when neither knows the folder. E.g. `fullObjectKey("visa-pathways")` → `library/001-visa-pathways/v1.1-member-visa-pathways.pdf`, `xlsxObjectKey("biz-plan-builder")` → `library/008-biz-plan-builder/v1.1-biz-plan-builder.xlsx`.
+- The filename repeats the folder slug; discovery ignores bare basenames (`v1.1-member.pdf`) and filenames whose slug differs from the folder. Signed URLs set `Content-Disposition: attachment; filename="<basename>"`, so downloads save as e.g. `v1.1-member-visa-pathways.pdf`.
 - **Workbook-only assets** (`kind: "xlsx"`): the member deliverable (`objectKey`, used by member download and landing full) is the `.xlsx`; there is no teaser.
 - **Slug identity** stays the bare slug (`visa-pathways`) for API routes, Neon rows and landing `id`s — never `001-visa-pathways`.
 - The legacy flat keys (`pack-a/<slug>.pdf`, `pack-a/teasers/…`, `library/<slug>.pdf`, `library/teasers/…`) are ignored and are deleted outside this app after cutover.
@@ -198,8 +199,8 @@ Member Library shows a disabled “Download unavailable” state when Member dow
       "memberDownloadable": false,
       "teaserPublic": false,
       "landingFull": false,
-      "fullObjectKey": "library/001-visa-pathways/v1.1-member.pdf",
-      "teaserObjectKey": "library/001-visa-pathways/v1.1-teaser.pdf",
+      "fullObjectKey": "library/001-visa-pathways/v1.1-member-visa-pathways.pdf",
+      "teaserObjectKey": "library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf",
       "xlsxObjectKey": null
     }
   ]

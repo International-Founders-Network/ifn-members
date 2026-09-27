@@ -126,11 +126,11 @@ export type PublicLibraryAsset = {
   memberDownloadable: boolean;
   teaserPublic: boolean;
   landingFull: boolean;
-  /** `library/<NNN>-<slug>/v1.1-member.pdf` (or `v1.1.xlsx` for workbooks); null if unknown. */
+  /** `library/<NNN>-<slug>/v1.1-member-<slug>.pdf` (or `v1.1-<slug>.xlsx` for workbooks); null if unknown. */
   fullObjectKey: string | null;
-  /** `library/<NNN>-<slug>/v1.1-teaser.pdf`; null for workbooks or if unknown. */
+  /** `library/<NNN>-<slug>/v1.1-teaser-<slug>.pdf`; null for workbooks or if unknown. */
   teaserObjectKey: string | null;
-  /** `library/<NNN>-<slug>/v1.1.xlsx` when the asset has a workbook; else null. */
+  /** `library/<NNN>-<slug>/v1.1-<slug>.xlsx` when the asset has a workbook; else null. */
   xlsxObjectKey: string | null;
 };
 

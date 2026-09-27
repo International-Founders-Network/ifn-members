@@ -59,9 +59,9 @@ describe("Pack A catalog", () => {
       "austin-ecosystem-map",
     ]);
     expect(PACK_A.map((i) => i.objectKey)).toEqual([
-      "library/001-visa-pathways/v1.1-member.pdf",
-      "library/002-entity-selection/v1.1-member.pdf",
-      "library/003-austin-ecosystem-map/v1.1-member.pdf",
+      "library/001-visa-pathways/v1.1-member-visa-pathways.pdf",
+      "library/002-entity-selection/v1.1-member-entity-selection.pdf",
+      "library/003-austin-ecosystem-map/v1.1-member-austin-ecosystem-map.pdf",
     ]);
     for (const item of PACK_A) {
       expect(item.objectKey).toBe(fullObjectKey(item.slug));
@@ -71,18 +71,18 @@ describe("Pack A catalog", () => {
   });
 
   it("builds member, teaser and xlsx keys in one serial folder", () => {
-    expect(fullObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-member.pdf");
-    expect(teaserObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-teaser.pdf");
+    expect(fullObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-member-visa-pathways.pdf");
+    expect(teaserObjectKey("visa-pathways")).toBe("library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf");
     expect(fullObjectKey("austin-relocation")).toBe(
-      "library/004-austin-relocation/v1.1-member.pdf",
+      "library/004-austin-relocation/v1.1-member-austin-relocation.pdf",
     );
-    expect(xlsxObjectKey("biz-plan-builder")).toBe("library/008-biz-plan-builder/v1.1.xlsx");
+    expect(xlsxObjectKey("biz-plan-builder")).toBe("library/008-biz-plan-builder/v1.1-biz-plan-builder.xlsx");
     // Outside the registry: needs a serial from discovery, else null.
     expect(fullObjectKey("brand-new")).toBeNull();
-    expect(teaserObjectKey("brand-new", "109")).toBe("library/109-brand-new/v1.1-teaser.pdf");
+    expect(teaserObjectKey("brand-new", "109")).toBe("library/109-brand-new/v1.1-teaser-brand-new.pdf");
     // The registry serial wins over a hint.
     expect(fullObjectKey("visa-pathways", "999")).toBe(
-      "library/001-visa-pathways/v1.1-member.pdf",
+      "library/001-visa-pathways/v1.1-member-visa-pathways.pdf",
     );
   });
 
@@ -208,8 +208,8 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "library/001-visa-pathways/v1.1-member.pdf",
-        teaserObjectKey: "library/001-visa-pathways/v1.1-teaser.pdf",
+        fullObjectKey: "library/001-visa-pathways/v1.1-member-visa-pathways.pdf",
+        teaserObjectKey: "library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf",
         xlsxObjectKey: null,
       },
       {
@@ -219,8 +219,8 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "library/002-entity-selection/v1.1-member.pdf",
-        teaserObjectKey: "library/002-entity-selection/v1.1-teaser.pdf",
+        fullObjectKey: "library/002-entity-selection/v1.1-member-entity-selection.pdf",
+        teaserObjectKey: "library/002-entity-selection/v1.1-teaser-entity-selection.pdf",
         xlsxObjectKey: null,
       },
       {
@@ -230,8 +230,8 @@ describe("public catalog", () => {
         memberDownloadable: false,
         teaserPublic: false,
         landingFull: false,
-        fullObjectKey: "library/003-austin-ecosystem-map/v1.1-member.pdf",
-        teaserObjectKey: "library/003-austin-ecosystem-map/v1.1-teaser.pdf",
+        fullObjectKey: "library/003-austin-ecosystem-map/v1.1-member-austin-ecosystem-map.pdf",
+        teaserObjectKey: "library/003-austin-ecosystem-map/v1.1-teaser-austin-ecosystem-map.pdf",
         xlsxObjectKey: null,
       },
     ]);
