@@ -65,7 +65,7 @@ const BULK_GROUPS = [...new Set(BULK_ACTIONS.map((action) => action.group))];
 /** Quiet footer action: small muted ghost link, paper-deep on hover. */
 const GHOST_ACTION = `inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-[var(--ink-muted)] no-underline transition-colors hover:bg-[var(--paper-deep)] hover:text-[var(--ink)] ${SELECTION.focus}`;
 
-/** One segment of the flag row: short visible label, full flag name as the accessible name. */
+/** One full-width flag row: short visible label left, small track right, full flag name as the accessible name. */
 function FlagSwitch({
   label,
   ariaLabel,
@@ -87,19 +87,27 @@ function FlagSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border px-2 text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
+      className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-md border px-3 text-left text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
         checked
           ? "border-[var(--ink)] bg-[var(--paper-deep)] text-[var(--ink)]"
           : "border-[var(--ink-muted)]/25 bg-[var(--ifn-surface,#fff)] text-[var(--ink-muted)] hover:border-[var(--ink-muted)]/60"
       }`}
     >
+      <span className="whitespace-nowrap">{label}</span>
       <span
         aria-hidden="true"
-        className={`h-1.5 w-1.5 shrink-0 rounded-full border ${
-          checked ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--ink-muted)]/60"
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
+          checked
+            ? "border-[var(--ink)] bg-[var(--ifn-surface,#fff)]"
+            : "border-[var(--ink-muted)]/40 bg-transparent"
         }`}
-      />
-      <span className="truncate">{label}</span>
+      >
+        <span
+          className={`absolute h-3.5 w-3.5 rounded-full transition-all ${
+            checked ? "left-[calc(100%-1rem)] bg-[var(--ink)]" : "left-0.5 bg-[var(--ink-muted)]/50"
+          }`}
+        />
+      </span>
     </button>
   );
 }
@@ -472,7 +480,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                     <div
                       role="group"
                       aria-label={`Approve ${item.title}`}
-                      className="mb-4 grid w-full grid-cols-3 gap-1"
+                      className="mb-4 flex w-full flex-col gap-1.5"
                     >
                       <FlagSwitch
                         label="Teaser"
