@@ -370,161 +370,164 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
       {visible.length === 0 ? (
         <NoMatch query={searchQuery} filterLabel={activeFilterLabel} onClear={clearAll} />
       ) : (
-        <ul className="grid list-none gap-6 p-0">
-          {visible.map((item) => {
-            const busy = pending === item.slug || bulkPending;
-            const isSelected = selected.has(item.slug);
-            const previewBase = `/api/admin/library/${item.slug}/preview`;
-            return (
-              <ResourceCard
-                key={item.slug}
-                slug={item.slug}
-                title={item.title}
-                description={item.description}
-                pills={<StatusPills item={item} />}
-                selected={isSelected}
-                leading={
-                  <label
-                    className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border px-2 ${SELECTION.off}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => toggleSelected(item.slug, e.target.checked)}
-                      className="h-5 w-5 cursor-pointer accent-[var(--ink)]"
-                    />
-                    <span className="sr-only">Select {item.title}</span>
-                  </label>
-                }
-                footer={
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-x-6 gap-y-2">
-                      {item.objectKey ? (
-                        <>
-                          <a
-                            href={`${previewBase}?kind=full`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(opens inline in a new tab)</span>
-                          </a>
-                          <a
-                            href={`${previewBase}?kind=full&disposition=attachment`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            {item.kind === "xlsx" ? "Download workbook" : "Download full PDF"}
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(downloads file)</span>
-                          </a>
-                        </>
-                      ) : null}
-                      {item.teaserObjectKey ? (
-                        <>
-                          <a
-                            href={`${previewBase}?kind=teaser`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            Preview teaser PDF
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(opens inline in a new tab)</span>
-                          </a>
-                          <a
-                            href={`${previewBase}?kind=teaser&disposition=attachment`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            Download teaser PDF
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(downloads file)</span>
-                          </a>
-                        </>
-                      ) : null}
-                    </div>
-                    <p className="font-mono text-xs text-[var(--ink-muted)]">
-                      {[
-                        item.nnn ? `#${item.nnn}` : "no serial",
-                        item.slug,
-                        item.objectKey ?? "no key yet",
-                        item.teaserObjectKey,
-                        item.kind === "pdf" ? item.xlsxObjectKey : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                    <p className="text-xs text-[var(--ink-muted)]">
-                      {item.updated_at && !item.updated_by ? "Discovered" : "Updated"}{" "}
-                      {fmtChicago(item.updated_at)}
-                      {item.updated_by ? ` · ${item.updated_by}` : ""}
-                      <span className="ml-1">(CT)</span>
-                    </p>
-                  </div>
-                }
-              >
-                <div className="mb-6 space-y-3">
-                  {item.teaserPublic ? (
-                    <p className="flex items-start gap-3 rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-4 py-3 text-sm text-[var(--ink)]">
-                      <CheckCircle2 size={20} aria-hidden="true" className="mt-0.5 shrink-0" />
-                      <span>
-                        <span className="block font-semibold">Approved for public</span>
-                        <span className="block text-xs leading-relaxed text-[var(--ink-muted)]">
-                          Public teaser is on (Landing full stays off). Switch teaser off below to withdraw.
-                        </span>
-                      </span>
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void save(item.slug, { approvePublic: true })}
-                      className={`flex min-h-11 w-full items-center gap-3 rounded-xl bg-[var(--crimson)] px-4 py-3 text-left text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus}`}
+        // Two columns only once each card has room for the flag switches.
+        <div className="@container">
+          <ul className="grid list-none grid-cols-1 gap-6 p-0 @3xl:grid-cols-2">
+            {visible.map((item) => {
+              const busy = pending === item.slug || bulkPending;
+              const isSelected = selected.has(item.slug);
+              const previewBase = `/api/admin/library/${item.slug}/preview`;
+              return (
+                <ResourceCard
+                  key={item.slug}
+                  slug={item.slug}
+                  title={item.title}
+                  description={item.description}
+                  pills={<StatusPills item={item} />}
+                  selected={isSelected}
+                  leading={
+                    <label
+                      className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border px-2 ${SELECTION.off}`}
                     >
-                      <ShieldCheck size={20} aria-hidden="true" className="shrink-0" />
-                      <span>
-                        <span className="block text-sm font-semibold">Approve public</span>
-                        <span className="block text-xs leading-relaxed text-white/85">
-                          Turns Public teaser ON and Landing full OFF. You can switch the teaser off afterward.
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => toggleSelected(item.slug, e.target.checked)}
+                        className="h-5 w-5 cursor-pointer accent-[var(--ink)]"
+                      />
+                      <span className="sr-only">Select {item.title}</span>
+                    </label>
+                  }
+                  footer={
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-wrap gap-x-6 gap-y-2">
+                        {item.objectKey ? (
+                          <>
+                            <a
+                              href={`${previewBase}?kind=full`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={TEXT_LINK}
+                            >
+                              {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
+                              <ExternalLink size={16} aria-hidden="true" />
+                              <span className="sr-only">(opens inline in a new tab)</span>
+                            </a>
+                            <a
+                              href={`${previewBase}?kind=full&disposition=attachment`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={TEXT_LINK}
+                            >
+                              {item.kind === "xlsx" ? "Download workbook" : "Download full PDF"}
+                              <ExternalLink size={16} aria-hidden="true" />
+                              <span className="sr-only">(downloads file)</span>
+                            </a>
+                          </>
+                        ) : null}
+                        {item.teaserObjectKey ? (
+                          <>
+                            <a
+                              href={`${previewBase}?kind=teaser`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={TEXT_LINK}
+                            >
+                              Preview teaser PDF
+                              <ExternalLink size={16} aria-hidden="true" />
+                              <span className="sr-only">(opens inline in a new tab)</span>
+                            </a>
+                            <a
+                              href={`${previewBase}?kind=teaser&disposition=attachment`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={TEXT_LINK}
+                            >
+                              Download teaser PDF
+                              <ExternalLink size={16} aria-hidden="true" />
+                              <span className="sr-only">(downloads file)</span>
+                            </a>
+                          </>
+                        ) : null}
+                      </div>
+                      <p className="font-mono text-xs text-[var(--ink-muted)] [overflow-wrap:anywhere]">
+                        {[
+                          item.nnn ? `#${item.nnn}` : "no serial",
+                          item.slug,
+                          item.objectKey ?? "no key yet",
+                          item.teaserObjectKey,
+                          item.kind === "pdf" ? item.xlsxObjectKey : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                      <p className="text-xs text-[var(--ink-muted)]">
+                        {item.updated_at && !item.updated_by ? "Discovered" : "Updated"}{" "}
+                        {fmtChicago(item.updated_at)}
+                        {item.updated_by ? ` · ${item.updated_by}` : ""}
+                        <span className="ml-1">(CT)</span>
+                      </p>
+                    </div>
+                  }
+                >
+                  <div className="mb-6 space-y-3">
+                    {item.teaserPublic ? (
+                      <p className="flex items-start gap-3 rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-4 py-3 text-sm text-[var(--ink)]">
+                        <CheckCircle2 size={20} aria-hidden="true" className="mt-0.5 shrink-0" />
+                        <span>
+                          <span className="block font-semibold">Approved for public</span>
+                          <span className="block text-xs leading-relaxed text-[var(--ink-muted)]">
+                            Public teaser is on (Landing full stays off). Switch teaser off below to withdraw.
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  )}
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void save(item.slug, { approvePublic: true })}
+                        className={`flex min-h-11 w-full items-center gap-3 rounded-xl bg-[var(--crimson)] px-4 py-3 text-left text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus}`}
+                      >
+                        <ShieldCheck size={20} aria-hidden="true" className="shrink-0" />
+                        <span>
+                          <span className="block text-sm font-semibold">Approve public</span>
+                          <span className="block text-xs leading-relaxed text-white/85">
+                            Turns Public teaser ON and Landing full OFF. You can switch the teaser off afterward.
+                          </span>
+                        </span>
+                      </button>
+                    )}
 
-                  <FlagSwitch
-                    id={`${item.slug}-teaser`}
-                    label="Public teaser"
-                    description="Landing may offer the teaser PDF. Mutually exclusive with Landing full — turning this on turns Landing full off."
-                    checked={item.teaserPublic}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { teaserPublic: next })}
-                  />
-                  <FlagSwitch
-                    id={`${item.slug}-member`}
-                    label="Member download"
-                    description="Entitled members download the full PDF on members.ifn.community."
-                    checked={item.downloadable}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { downloadable: next })}
-                  />
-                  <FlagSwitch
-                    id={`${item.slug}-landing-full`}
-                    label="Landing full download"
-                    description="Anyone on ifn.community may download the full PDF, no sign-in. Mutually exclusive with Public teaser — turning this on turns Public teaser off."
-                    checked={item.landingFull}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { landingFull: next })}
-                  />
-                </div>
-              </ResourceCard>
-            );
-          })}
-        </ul>
+                    <FlagSwitch
+                      id={`${item.slug}-teaser`}
+                      label="Public teaser"
+                      description="Landing may offer the teaser PDF. Mutually exclusive with Landing full. Turning this on turns Landing full off."
+                      checked={item.teaserPublic}
+                      disabled={busy}
+                      onChange={(next) => void save(item.slug, { teaserPublic: next })}
+                    />
+                    <FlagSwitch
+                      id={`${item.slug}-member`}
+                      label="Member download"
+                      description="Entitled members download the full PDF on members.ifn.community."
+                      checked={item.downloadable}
+                      disabled={busy}
+                      onChange={(next) => void save(item.slug, { downloadable: next })}
+                    />
+                    <FlagSwitch
+                      id={`${item.slug}-landing-full`}
+                      label="Landing full download"
+                      description="Anyone on ifn.community may download the full PDF, no sign-in. Mutually exclusive with Public teaser. Turning this on turns Public teaser off."
+                      checked={item.landingFull}
+                      disabled={busy}
+                      onChange={(next) => void save(item.slug, { landingFull: next })}
+                    />
+                  </div>
+                </ResourceCard>
+              );
+            })}
+          </ul>
+        </div>
       )}
 
       {selected.size > 0 ? (

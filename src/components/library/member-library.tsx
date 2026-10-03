@@ -182,58 +182,61 @@ export function MemberLibrary({
           }
         />
       ) : (
-        <ul className="grid list-none gap-6 p-0 md:grid-cols-2">
-          {visible.map((item) => (
-            <ResourceCard
-              key={item.slug}
-              slug={item.slug}
-              title={item.title}
-              description={item.description}
-              pills={
-                <>
-                  <span className={PILL_NEUTRAL}>{item.tag}</span>
-                  {item.canDownload ? (
-                    <span className={PILL_ON}>
-                      <Download size={12} aria-hidden="true" />
-                      Ready
-                    </span>
-                  ) : null}
-                </>
-              }
-              memberCta={
-                entitled && item.canDownload ? (
-                  <ResourceCtaLink
-                    href={`/api/library/${item.slug}/download`}
-                    icon={<Download size={16} aria-hidden="true" />}
-                  >
-                    Download PDF
-                  </ResourceCtaLink>
-                ) : null
-              }
-              footer={
-                !entitled ? (
-                  <p className={STATUS_TEXT}>
-                    <Lock size={16} aria-hidden="true" />
-                    Available after membership is linked.
-                  </p>
-                ) : !item.canDownload ? (
-                  <div>
-                    <p
-                      aria-disabled="true"
-                      className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--ink-muted)]"
+        // Columns follow the card area beside the stage sidebar, not the viewport.
+        <div className="@container">
+          <ul className="grid list-none grid-cols-1 gap-6 p-0 @md:grid-cols-2 @2xl:grid-cols-3">
+            {visible.map((item) => (
+              <ResourceCard
+                key={item.slug}
+                slug={item.slug}
+                title={item.title}
+                description={item.description}
+                pills={
+                  <>
+                    <span className={PILL_NEUTRAL}>{item.tag}</span>
+                    {item.canDownload ? (
+                      <span className={PILL_ON}>
+                        <Download size={12} aria-hidden="true" />
+                        Ready
+                      </span>
+                    ) : null}
+                  </>
+                }
+                memberCta={
+                  entitled && item.canDownload ? (
+                    <ResourceCtaLink
+                      href={`/api/library/${item.slug}/download`}
+                      icon={<Download size={16} aria-hidden="true" />}
                     >
-                      <Clock size={16} aria-hidden="true" />
-                      Download unavailable
+                      Download PDF
+                    </ResourceCtaLink>
+                  ) : null
+                }
+                footer={
+                  !entitled ? (
+                    <p className={STATUS_TEXT}>
+                      <Lock size={16} aria-hidden="true" />
+                      Available after membership is linked.
                     </p>
-                    <p className="text-sm text-[var(--ink-muted)]">
-                      This file is not enabled for download yet.
-                    </p>
-                  </div>
-                ) : null
-              }
-            />
-          ))}
-        </ul>
+                  ) : !item.canDownload ? (
+                    <div>
+                      <p
+                        aria-disabled="true"
+                        className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--ink-muted)]"
+                      >
+                        <Clock size={16} aria-hidden="true" />
+                        Download unavailable
+                      </p>
+                      <p className="text-sm text-[var(--ink-muted)]">
+                        This file is not enabled for download yet.
+                      </p>
+                    </div>
+                  ) : null
+                }
+              />
+            ))}
+          </ul>
+        </div>
       )}
     </LibraryBrowseLayout>
   );
