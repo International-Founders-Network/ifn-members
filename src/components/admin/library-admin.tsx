@@ -62,14 +62,19 @@ const BULK_ACTIONS: Array<{
 
 const BULK_GROUPS = [...new Set(BULK_ACTIONS.map((action) => action.group))];
 
-/** Compact on/off row: label on the left, On/Off on the right, ink fill when on. */
+/** Quiet footer action: small muted ghost link, paper-deep on hover. */
+const GHOST_ACTION = `inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-[var(--ink-muted)] no-underline transition-colors hover:bg-[var(--paper-deep)] hover:text-[var(--ink)] ${SELECTION.focus}`;
+
+/** One segment of the flag row: short visible label, full flag name as the accessible name. */
 function FlagSwitch({
   label,
+  ariaLabel,
   checked,
   disabled,
   onChange,
 }: {
   label: string;
+  ariaLabel: string;
   checked: boolean;
   disabled: boolean;
   onChange: (next: boolean) => void;
@@ -79,19 +84,22 @@ function FlagSwitch({
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 text-left text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
-        checked ? SELECTION.on : SELECTION.off
+      className={`inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border px-2 text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
+        checked
+          ? "border-[var(--ink)] bg-[var(--paper-deep)] text-[var(--ink)]"
+          : "border-[var(--ink-muted)]/25 bg-[var(--ifn-surface,#fff)] text-[var(--ink-muted)] hover:border-[var(--ink-muted)]/60"
       }`}
     >
-      <span>{label}</span>
       <span
         aria-hidden="true"
-        className={checked ? "text-[var(--paper)]" : "font-medium text-[var(--ink-muted)]"}
-      >
-        {checked ? "On" : "Off"}
-      </span>
+        className={`h-1.5 w-1.5 shrink-0 rounded-full border ${
+          checked ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--ink-muted)]/60"
+        }`}
+      />
+      <span className="truncate">{label}</span>
     </button>
   );
 }
@@ -434,13 +442,13 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                     }
                     footer={
                       item.objectKey || item.teaserObjectKey ? (
-                        <div className="flex flex-wrap gap-x-6">
+                        <div className="flex flex-wrap gap-1">
                           {item.objectKey ? (
                             <a
                               href={`${previewBase}?kind=full`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={TEXT_LINK}
+                              className={GHOST_ACTION}
                             >
                               {item.kind === "xlsx" ? "Preview workbook" : "Preview"}
                               <span className="sr-only"> {item.title} (opens in a new tab)</span>
@@ -451,7 +459,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                               href={`${previewBase}?kind=teaser`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={TEXT_LINK}
+                              className={GHOST_ACTION}
                             >
                               Teaser
                               <span className="sr-only"> for {item.title} (opens in a new tab)</span>
@@ -461,21 +469,28 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                       ) : null
                     }
                   >
-                    <div role="group" aria-label={`Approve ${item.title}`} className="mb-4 space-y-2">
+                    <div
+                      role="group"
+                      aria-label={`Approve ${item.title}`}
+                      className="mb-4 grid w-full grid-cols-3 gap-1"
+                    >
                       <FlagSwitch
-                        label="Public teaser"
+                        label="Teaser"
+                        ariaLabel="Public teaser"
                         checked={item.teaserPublic}
                         disabled={busy}
                         onChange={(next) => void save(item.slug, { teaserPublic: next })}
                       />
                       <FlagSwitch
-                        label="Member download"
+                        label="Members"
+                        ariaLabel="Member download"
                         checked={item.downloadable}
                         disabled={busy}
                         onChange={(next) => void save(item.slug, { downloadable: next })}
                       />
                       <FlagSwitch
-                        label="Landing full"
+                        label="Landing"
+                        ariaLabel="Landing full"
                         checked={item.landingFull}
                         disabled={busy}
                         onChange={(next) => void save(item.slug, { landingFull: next })}
