@@ -54,7 +54,7 @@ const MEMBER_FILTERS: Array<{ id: MemberFilter; label: string }> = [
 ];
 
 /** Same icons as landing Resources. */
-const PERSONA_ICONS: Record<string, LucideIcon> = {
+export const PERSONA_ICONS: Record<string, LucideIcon> = {
   aspiring: Sprout,
   startups: Rocket,
   smbs: Store,
@@ -62,7 +62,7 @@ const PERSONA_ICONS: Record<string, LucideIcon> = {
   global_expansion: Globe,
 };
 
-const PERSONA_OPTIONS = LIBRARY_PERSONAS.map((persona) => {
+export const PERSONA_OPTIONS = LIBRARY_PERSONAS.map((persona) => {
   const Icon = PERSONA_ICONS[persona.id] ?? Compass;
   return {
     id: persona.id as LibraryPersonaId,

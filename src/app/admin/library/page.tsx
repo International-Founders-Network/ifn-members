@@ -44,44 +44,10 @@ export default async function AdminLibraryPage() {
           Library
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>
-        <p className="mt-3 max-w-2xl text-[var(--ink-muted)] leading-relaxed">
-          Decide where each library file can be downloaded. Every file has three
-          switches, and they all start off until you turn them on. Preview and
-          Download ignore the switches and open a short-lived link, so you can check
-          a file before you share it.
+        <p className="mt-2 text-[var(--ink-muted)]">
+          Turn each guide on for members or for the public site.
         </p>
       </div>
-
-      <section aria-label="What each switch does" className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-5">
-          <h2 className="text-base font-semibold">Member download</h2>
-          <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">
-            Entitled members can download the full PDF from this site. It works on
-            its own, separate from the two public switches.
-          </p>
-        </div>
-        <div className="rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] p-5 md:col-span-2">
-          <p className="text-sm font-semibold text-[var(--crimson)]">
-            Public teaser and Landing full cannot both be on.
-          </p>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-[var(--ink-muted)]/20 bg-white p-4">
-              <h2 className="text-base font-semibold">Public teaser</h2>
-              <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">
-                The public site offers the teaser PDF. Turning it on turns Landing
-                full off.
-              </p>
-            </div>
-            <div className="rounded-lg border border-[var(--ink-muted)]/20 bg-white p-4">
-              <h2 className="text-base font-semibold">Landing full</h2>
-              <p className="mt-1 text-sm text-[var(--ink-muted)] leading-relaxed">
-                Anyone on the public site can download the full PDF without signing
-                in. Turning it on turns Public teaser off.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {dbMissing ? (
         <p className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-4 text-[var(--ink-muted)]">
