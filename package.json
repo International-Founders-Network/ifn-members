@@ -14,7 +14,7 @@
     "@aws-sdk/client-s3": "^3.1141.0",
     "@aws-sdk/s3-request-presigner": "^3.1141.0",
     "@clerk/nextjs": "^7.9.7",
-    "@ifn/ui": "github:International-Founders-Network/ifn-ui#47bd91708ac88c978c7e31e50dae68ae4a60da77",
+    "@ifn/ui": "file:../ifn-ui-library-ia",
     "@neondatabase/serverless": "^1.1.0",
     "lucide-react": "^0.563.0",
     "next": "16.3.6",
