@@ -1,25 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { Compass, Eye, Globe, Lock, ShieldCheck, ShieldOff } from "lucide-react";
 import {
-  CheckCircle2,
-  ExternalLink,
-  Globe,
-  Lock,
-  ShieldCheck,
-  ShieldOff,
-} from "lucide-react";
-import {
+  FilterChips,
+  LIBRARY_PERSONAS,
+  LibraryBrowseLayout,
+  LibrarySearch,
   NoMatch,
   OUTLINE_BUTTON,
+  PersonaTabs,
   PILL_NEUTRAL,
-  PILL_OFF,
-  PILL_ON,
   ResourceCard,
-  ResourceFilters,
+  ResultCount,
   SELECTION,
+  StageSidebar,
   TEXT_LINK,
+  type LibraryPersonaId,
 } from "@ifn/ui";
+import { PERSONA_ICONS, PERSONA_OPTIONS } from "@/components/library/member-library";
 import type { AdminLibraryAsset } from "@/lib/library-assets";
 import {
   ADMIN_STATUS_FILTERS,
@@ -32,6 +31,7 @@ import {
   type LibraryAssetFlags,
   type LibraryFlagsPatch,
 } from "@/lib/library-flags";
+import { libraryPlacementForSlug } from "@/lib/library-placement";
 
 /** What the Admin PATCH accepts: flags plus the approve/deny-public shortcuts. */
 type AdminFlagsRequest = LibraryFlagsPatch & { approvePublic?: true; denyPublic?: true };
@@ -60,33 +60,19 @@ const BULK_ACTIONS: Array<{
 
 const BULK_GROUPS = [...new Set(BULK_ACTIONS.map((action) => action.group))];
 
-function fmtChicago(iso: string | null): string {
-  if (!iso) return "never";
-  return new Date(iso).toLocaleString("en-US", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+/** Quiet footer action: small muted ghost link, paper-deep on hover. */
+const GHOST_ACTION = `inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-[var(--ink-muted)] no-underline transition-colors hover:bg-[var(--paper-deep)] hover:text-[var(--ink)] ${SELECTION.focus}`;
 
-/**
- * Large on/off row: the whole row is the `role="switch"` target, and on uses the
- * same ink fill as the Resources selection chips.
- */
+/** One flag control: icon-only square switch. Ink icon on paper-deep when on, muted on hairline when off. */
 function FlagSwitch({
-  id,
   label,
-  description,
+  icon,
   checked,
   disabled,
   onChange,
 }: {
-  id: string;
   label: string;
-  description: string;
+  icon: ReactNode;
   checked: boolean;
   disabled: boolean;
   onChange: (next: boolean) => void;
@@ -96,100 +82,64 @@ function FlagSwitch({
       type="button"
       role="switch"
       aria-checked={checked}
-      aria-labelledby={`${id}-label`}
-      aria-describedby={`${id}-desc`}
+      aria-label={label}
+      title={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`flex min-h-11 w-full items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
-        checked ? SELECTION.on : SELECTION.off
-      }`}
+      className={`inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md border transition-colors disabled:cursor-wait disabled:opacity-60 ${
+        checked
+          ? "border-[var(--ink)] bg-[var(--paper-deep)] text-[var(--ink)]"
+          : "border-[var(--ink-muted)]/30 text-[var(--ink-muted)] hover:border-[var(--ink-muted)]/70 hover:text-[var(--ink)]"
+      } ${SELECTION.focus}`}
     >
-      <span className="min-w-0">
-        <span id={`${id}-label`} className="block text-sm font-semibold">
-          {label}
-        </span>
-        <span
-          id={`${id}-desc`}
-          className={`mt-0.5 block text-xs leading-relaxed ${
-            checked ? "text-[var(--paper)]/80" : "text-[var(--ink-muted)]"
-          }`}
-        >
-          {description}
-        </span>
-      </span>
-      <span className="flex shrink-0 items-center gap-2" aria-hidden="true">
-        <span className="w-7 text-right text-xs font-bold uppercase tracking-wide">
-          {checked ? "On" : "Off"}
-        </span>
-        <span
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            checked ? "bg-[var(--paper)]" : "bg-[var(--ink-muted)]/35"
-          }`}
-        >
-          <span
-            className={`inline-block h-5 w-5 rounded-full shadow transition-transform ${
-              checked ? "translate-x-[22px] bg-[var(--ink)]" : "translate-x-0.5 bg-white"
-            }`}
-          />
-        </span>
-      </span>
+      {icon}
     </button>
   );
 }
 
 function StatusPills({ item }: { item: AdminLibraryAsset }) {
-  const anyOn = item.downloadable || item.teaserPublic || item.landingFull;
-  return (
-    <>
-      <span className={PILL_NEUTRAL}>{item.tag}</span>
-      {item.kind === "pdf" && item.storage && !item.storage.full ? (
-        <span className={PILL_OFF}>No full PDF on R2</span>
-      ) : null}
-      {item.kind === "pdf" && item.storage && !item.storage.teaser ? (
-        <span className={PILL_OFF}>No teaser on R2</span>
-      ) : null}
-      {item.kind === "xlsx" && item.storage && !item.storage.xlsx ? (
-        <span className={PILL_OFF}>No workbook on R2</span>
-      ) : null}
-      {item.kind === "pdf" && item.storage?.xlsx ? (
-        <span className={PILL_NEUTRAL}>Workbook on R2</span>
-      ) : null}
-      {item.downloadable ? (
-        <span className={PILL_ON}>
-          <Lock size={12} aria-hidden="true" />
-          Members
-        </span>
-      ) : null}
-      {item.teaserPublic ? <span className={PILL_ON}>Teaser public</span> : null}
-      {item.landingFull ? (
-        <span className={PILL_ON}>
-          <Globe size={12} aria-hidden="true" />
-          Landing full
-        </span>
-      ) : null}
-      {!anyOn ? <span className={PILL_OFF}>Not live</span> : null}
-    </>
-  );
+  return <span className={PILL_NEUTRAL}>{item.tag}</span>;
 }
 
 export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
   const [rows, setRows] = useState(items);
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [personaId, setPersonaId] = useState<LibraryPersonaId>(LIBRARY_PERSONAS[0].id);
+  const [stageId, setStageId] = useState<string>(LIBRARY_PERSONAS[0].stages[0].id);
+  /** Showing files that have no persona/stage placement instead of a stage. */
+  const [unplacedView, setUnplacedView] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<AdminStatusFilter>("all");
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [bulkPending, setBulkPending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const persona = LIBRARY_PERSONAS.find((p) => p.id === personaId) ?? LIBRARY_PERSONAS[0];
+  const stage = persona.stages.find((s) => s.id === stageId) ?? persona.stages[0];
+  const PersonaIcon = PERSONA_ICONS[persona.id] ?? Compass;
+
+  const placed = useMemo(
+    () => rows.map((row) => ({ row, placement: libraryPlacementForSlug(row.slug) })),
+    [rows],
+  );
+  const unplacedCount = placed.filter((entry) => !entry.placement).length;
+  const showUnplaced = unplacedView && unplacedCount > 0;
+
+  // Search runs inside the chosen persona and stage (or the unplaced set), then status.
   const searched = useMemo(
-    () => rows.filter((row) => matchesLibraryQuery(row, searchQuery)),
-    [rows, searchQuery],
+    () =>
+      placed
+        .filter(({ placement }) =>
+          showUnplaced
+            ? !placement
+            : placement?.personaId === persona.id && placement.stageId === stage.id,
+        )
+        .map(({ row }) => row)
+        .filter((row) => matchesLibraryQuery(row, searchQuery)),
+    [placed, showUnplaced, persona.id, stage.id, searchQuery],
   );
-  const visible = useMemo(
-    () => searched.filter((row) => matchesAdminStatus(row, status)),
-    [searched, status],
-  );
+  const visible = searched.filter((row) => matchesAdminStatus(row, status));
   const statusOptions = ADMIN_STATUS_FILTERS.map((option) => ({
     ...option,
     count: searched.filter((row) => matchesAdminStatus(row, option.id)).length,
@@ -206,6 +156,19 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
   function clearAll() {
     setSearchQuery("");
     setStatus("all");
+  }
+
+  function handlePersonaChange(id: LibraryPersonaId) {
+    const next = LIBRARY_PERSONAS.find((p) => p.id === id) ?? LIBRARY_PERSONAS[0];
+    setPersonaId(next.id);
+    setStageId(next.stages[0].id);
+    setUnplacedView(false);
+    setSearchQuery("");
+  }
+
+  function handleStageChange(id: string) {
+    setStageId(id);
+    setUnplacedView(false);
   }
 
   function toggleSelected(slug: string, next: boolean) {
@@ -318,214 +281,202 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
 
   return (
     <div className="space-y-6">
-      <ResourceFilters
-        search={{
-          id: "admin-library-search",
-          label: "Search library files by title or slug",
-          placeholder: "Search by title or slug",
-          value: searchQuery,
-          onChange: setSearchQuery,
-        }}
-        chips={{ label: "Filter by status", options: statusOptions, value: status, onChange: setStatus }}
-        count={{ shown: visible.length, isFiltered }}
+      <LibraryBrowseLayout
+        personas={
+          <>
+            <PersonaTabs options={PERSONA_OPTIONS} value={persona.id} onChange={handlePersonaChange} />
+            <div className="mx-auto w-full max-w-xl">
+              <LibrarySearch
+                id="admin-library-search"
+                label={`Search files for ${persona.name}`}
+                placeholder={`Search ${persona.name} files`}
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
+            </div>
+          </>
+        }
+        sidebar={
+          <>
+            <StageSidebar stages={persona.stages} value={stage.id} onChange={handleStageChange} />
+            {unplacedCount > 0 ? (
+              <div className="px-8 pb-6">
+                <button
+                  type="button"
+                  aria-pressed={showUnplaced}
+                  onClick={() => setUnplacedView((prev) => !prev)}
+                  className={TEXT_LINK}
+                >
+                  {unplacedCount} not on a stage
+                </button>
+              </div>
+            ) : null}
+          </>
+        }
       >
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={selectAllVisible}
-            disabled={visible.length === 0 || allVisibleSelected}
-            className={OUTLINE_BUTTON}
-          >
-            Select all {isFiltered ? "filtered" : "shown"} ({visible.length})
-          </button>
-          <button
-            type="button"
-            onClick={clearSelection}
-            disabled={selected.size === 0}
-            className={OUTLINE_BUTTON}
-          >
-            Clear selection
-          </button>
+        <div className="mb-8 space-y-3">
+          {showUnplaced ? (
+            <>
+              <h2 className="text-2xl font-bold tracking-tight">Not on a stage</h2>
+              <p className="max-w-md text-[var(--ink-muted)]">
+                These files have no persona or stage yet.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="inline-flex items-center gap-2 rounded-full border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-3 py-1 text-xs font-bold uppercase tracking-wide">
+                <PersonaIcon size={14} aria-hidden="true" />
+                {persona.name}
+              </p>
+              <h2 className="text-2xl font-bold tracking-tight">{stage.name}</h2>
+              <p className="max-w-md text-[var(--ink-muted)]">{stage.description}</p>
+            </>
+          )}
+          <ResultCount shown={visible.length} isFiltered={isFiltered} noun="file" />
+          <div className="pt-2">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--ink-muted)]">
+              Status
+            </p>
+            <FilterChips
+              label="Filter by status"
+              options={statusOptions}
+              value={status}
+              onChange={setStatus}
+            />
+          </div>
+          {visible.length > 0 ? (
+            <button
+              type="button"
+              onClick={selectAllVisible}
+              disabled={allVisibleSelected}
+              className={`${TEXT_LINK} disabled:cursor-default disabled:opacity-60`}
+            >
+              Select all shown ({visible.length})
+            </button>
+          ) : null}
         </div>
-      </ResourceFilters>
 
-      {notice ? (
-        <p
-          role="status"
-          className="rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-4 py-3 text-sm text-[var(--ink)]"
-        >
-          {notice}
-        </p>
-      ) : null}
+        {notice ? (
+          <p
+            role="status"
+            className="mb-6 rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-4 py-3 text-sm text-[var(--ink)]"
+          >
+            {notice}
+          </p>
+        ) : null}
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-        >
-          {error}
-        </p>
-      ) : null}
+        {error ? (
+          <p
+            role="alert"
+            className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          >
+            {error}
+          </p>
+        ) : null}
 
-      {visible.length === 0 ? (
-        <NoMatch query={searchQuery} filterLabel={activeFilterLabel} onClear={clearAll} />
-      ) : (
-        <ul className="grid list-none gap-6 p-0">
-          {visible.map((item) => {
-            const busy = pending === item.slug || bulkPending;
-            const isSelected = selected.has(item.slug);
-            const previewBase = `/api/admin/library/${item.slug}/preview`;
-            return (
-              <ResourceCard
-                key={item.slug}
-                slug={item.slug}
-                title={item.title}
-                description={item.description}
-                pills={<StatusPills item={item} />}
-                selected={isSelected}
-                leading={
-                  <label
-                    className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border px-2 ${SELECTION.off}`}
+        {visible.length === 0 ? (
+          <NoMatch
+            query={searchQuery}
+            filterLabel={activeFilterLabel}
+            noun="file"
+            titleAs="h3"
+            description={
+              isFiltered || showUnplaced
+                ? undefined
+                : <>No files for {stage.name} yet. Try another stage.</>
+            }
+            onClear={clearAll}
+          />
+        ) : (
+          // Same card grid as the member Library.
+          <div className="@container">
+            <ul className="grid list-none grid-cols-1 gap-6 p-0 @md:grid-cols-2 @2xl:grid-cols-3">
+              {visible.map((item) => {
+                const busy = pending === item.slug || bulkPending;
+                const isSelected = selected.has(item.slug);
+                const previewBase = `/api/admin/library/${item.slug}/preview`;
+                return (
+                  <ResourceCard
+                    key={item.slug}
+                    slug={item.slug}
+                    title={item.title}
+                    description={item.description}
+                    pills={<StatusPills item={item} />}
+                    selected={isSelected}
+                    leading={
+                      <label className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => toggleSelected(item.slug, e.target.checked)}
+                          className="h-4 w-4 cursor-pointer accent-[var(--ink)]"
+                        />
+                        <span className="sr-only">Select {item.title}</span>
+                      </label>
+                    }
+                    footer={
+                      item.objectKey || item.teaserObjectKey ? (
+                        <div className="flex flex-wrap gap-1">
+                          {item.objectKey ? (
+                            <a
+                              href={`${previewBase}?kind=full`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={GHOST_ACTION}
+                            >
+                              {item.kind === "xlsx" ? "Preview workbook" : "Preview"}
+                              <span className="sr-only"> {item.title} (opens in a new tab)</span>
+                            </a>
+                          ) : null}
+                          {item.teaserObjectKey ? (
+                            <a
+                              href={`${previewBase}?kind=teaser`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={GHOST_ACTION}
+                            >
+                              Teaser
+                              <span className="sr-only"> for {item.title} (opens in a new tab)</span>
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => toggleSelected(item.slug, e.target.checked)}
-                      className="h-5 w-5 cursor-pointer accent-[var(--ink)]"
-                    />
-                    <span className="sr-only">Select {item.title}</span>
-                  </label>
-                }
-                footer={
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-x-6 gap-y-2">
-                      {item.objectKey ? (
-                        <>
-                          <a
-                            href={`${previewBase}?kind=full`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            {item.kind === "xlsx" ? "Preview workbook" : "Preview full PDF"}
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(opens inline in a new tab)</span>
-                          </a>
-                          <a
-                            href={`${previewBase}?kind=full&disposition=attachment`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            {item.kind === "xlsx" ? "Download workbook" : "Download full PDF"}
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(downloads file)</span>
-                          </a>
-                        </>
-                      ) : null}
-                      {item.teaserObjectKey ? (
-                        <>
-                          <a
-                            href={`${previewBase}?kind=teaser`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            Preview teaser PDF
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(opens inline in a new tab)</span>
-                          </a>
-                          <a
-                            href={`${previewBase}?kind=teaser&disposition=attachment`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={TEXT_LINK}
-                          >
-                            Download teaser PDF
-                            <ExternalLink size={16} aria-hidden="true" />
-                            <span className="sr-only">(downloads file)</span>
-                          </a>
-                        </>
-                      ) : null}
-                    </div>
-                    <p className="font-mono text-xs text-[var(--ink-muted)]">
-                      {[
-                        item.nnn ? `#${item.nnn}` : "no serial",
-                        item.slug,
-                        item.objectKey ?? "no key yet",
-                        item.teaserObjectKey,
-                        item.kind === "pdf" ? item.xlsxObjectKey : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                    <p className="text-xs text-[var(--ink-muted)]">
-                      {item.updated_at && !item.updated_by ? "Discovered" : "Updated"}{" "}
-                      {fmtChicago(item.updated_at)}
-                      {item.updated_by ? ` · ${item.updated_by}` : ""}
-                      <span className="ml-1">(CT)</span>
-                    </p>
-                  </div>
-                }
-              >
-                <div className="mb-6 space-y-3">
-                  {item.teaserPublic ? (
-                    <p className="flex items-start gap-3 rounded-xl border border-[var(--ink-muted)]/20 bg-[var(--paper-deep)] px-4 py-3 text-sm text-[var(--ink)]">
-                      <CheckCircle2 size={20} aria-hidden="true" className="mt-0.5 shrink-0" />
-                      <span>
-                        <span className="block font-semibold">Approved for public</span>
-                        <span className="block text-xs leading-relaxed text-[var(--ink-muted)]">
-                          Public teaser is on (Landing full stays off). Switch teaser off below to withdraw.
-                        </span>
-                      </span>
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => void save(item.slug, { approvePublic: true })}
-                      className={`flex min-h-11 w-full items-center gap-3 rounded-xl bg-[var(--crimson)] px-4 py-3 text-left text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus}`}
+                    <div
+                      role="group"
+                      aria-label={`Approve ${item.title}`}
+                      className="mb-4 flex w-full flex-wrap items-center gap-2"
                     >
-                      <ShieldCheck size={20} aria-hidden="true" className="shrink-0" />
-                      <span>
-                        <span className="block text-sm font-semibold">Approve public</span>
-                        <span className="block text-xs leading-relaxed text-white/85">
-                          Turns Public teaser ON and Landing full OFF. You can switch the teaser off afterward.
-                        </span>
-                      </span>
-                    </button>
-                  )}
-
-                  <FlagSwitch
-                    id={`${item.slug}-teaser`}
-                    label="Public teaser"
-                    description="Landing may offer the teaser PDF. Mutually exclusive with Landing full — turning this on turns Landing full off."
-                    checked={item.teaserPublic}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { teaserPublic: next })}
-                  />
-                  <FlagSwitch
-                    id={`${item.slug}-member`}
-                    label="Member download"
-                    description="Entitled members download the full PDF on members.ifn.community."
-                    checked={item.downloadable}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { downloadable: next })}
-                  />
-                  <FlagSwitch
-                    id={`${item.slug}-landing-full`}
-                    label="Landing full download"
-                    description="Anyone on ifn.community may download the full PDF, no sign-in. Mutually exclusive with Public teaser — turning this on turns Public teaser off."
-                    checked={item.landingFull}
-                    disabled={busy}
-                    onChange={(next) => void save(item.slug, { landingFull: next })}
-                  />
-                </div>
-              </ResourceCard>
-            );
-          })}
-        </ul>
-      )}
+                      <FlagSwitch
+                        label="Teaser"
+                        icon={<Eye size={18} aria-hidden="true" />}
+                        checked={item.teaserPublic}
+                        disabled={busy}
+                        onChange={(next) => void save(item.slug, { teaserPublic: next })}
+                      />
+                      <FlagSwitch
+                        label="Members"
+                        icon={<Lock size={18} aria-hidden="true" />}
+                        checked={item.downloadable}
+                        disabled={busy}
+                        onChange={(next) => void save(item.slug, { downloadable: next })}
+                      />
+                      <FlagSwitch
+                        label="Landing"
+                        icon={<Globe size={18} aria-hidden="true" />}
+                        checked={item.landingFull}
+                        disabled={busy}
+                        onChange={(next) => void save(item.slug, { landingFull: next })}
+                      />
+                    </div>
+                  </ResourceCard>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+      </LibraryBrowseLayout>
 
       {selected.size > 0 ? (
         <div
@@ -538,7 +489,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
               {selected.size} selected
               {hiddenSelected > 0 ? (
                 <span className="font-normal text-[var(--ink-muted)]">
-                  {" "}({hiddenSelected} hidden by search or filter)
+                  {" "}({hiddenSelected} not shown)
                 </span>
               ) : null}
             </p>

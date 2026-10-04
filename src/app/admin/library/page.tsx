@@ -44,58 +44,8 @@ export default async function AdminLibraryPage() {
           Library
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>
-        <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
-          Per-file flags for every library asset, all <strong>off</strong> by
-          default (a file with no saved row is fully off). Off always wins for that
-          surface. <strong>Public teaser</strong> and{" "}
-          <strong>Landing full download</strong> are mutually exclusive — turning
-          one on turns the other off. <strong>Member download</strong> is
-          independent. Every serial in the registry, and every file Content uploads
-          to R2 as{" "}
-          <code className="text-sm">library/&lt;NNN&gt;-&lt;slug&gt;/v1.1-member-&lt;slug&gt;.pdf</code>,{" "}
-          <code className="text-sm">v1.1-teaser-&lt;slug&gt;.pdf</code> or{" "}
-          <code className="text-sm">v1.1-&lt;slug&gt;.xlsx</code>, shows up here on the next load,
-          with all flags off.
-        </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-[var(--ink-muted)] leading-relaxed">
-          <li>
-            <strong className="text-[var(--ink)]">Approve public</strong> is the
-            primary action: it turns <strong>Public teaser</strong> ON and{" "}
-            <strong>Landing full</strong> OFF. You can switch the teaser off afterward.
-          </li>
-          <li>
-            <strong className="text-[var(--ink)]">Bulk</strong>: tick files (or{" "}
-            <strong>Select all</strong> for the current search and filter), then use
-            the bar at the bottom. <strong>Deny public</strong> turns Public teaser
-            and Landing full off; Member download is left as is.
-          </li>
-          <li>
-            <strong className="text-[var(--ink)]">Public teaser</strong>: landing
-            may offer the teaser only. Mutually exclusive with Landing full; never
-            unlocks the full PDF.
-          </li>
-          <li>
-            <strong className="text-[var(--ink)]">Member download</strong>:
-            entitled members download the full PDF here (independent of the public
-            flags).
-          </li>
-          <li>
-            <strong className="text-[var(--ink)]">Landing full download</strong>:
-            anyone on ifn.community may download the full PDF, no sign-in. Mutually
-            exclusive with Public teaser.
-          </li>
-        </ul>
-        <p className="mt-3 text-[var(--ink-muted)] leading-relaxed">
-          When an object is on R2, use <strong>Preview</strong> (opens the PDF
-          inline in a new tab) or <strong>Download</strong> (saves the file). Both
-          ignore the surface flags and use a 5-minute signed link. Member file and
-          teaser share one serial folder:{" "}
-          <code className="text-sm">library/001-visa-pathways/v1.1-teaser-visa-pathways.pdf</code>.
-          Workbook-only assets have no teaser. Flags
-          save even if the object is not on R2 yet; nothing reaches members or the
-          landing until the flag is on and storage serves the file. This page is the
-          only Library source of truth; landing has no Library Admin and reads{" "}
-          <code className="text-sm">/api/public/library</code>.
+        <p className="mt-2 text-[var(--ink-muted)]">
+          Turn each guide on for members or for the public site.
         </p>
       </div>
 
