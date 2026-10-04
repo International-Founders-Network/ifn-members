@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Compass, Globe, Lock, ShieldCheck, ShieldOff } from "lucide-react";
 import {
   FilterChips,
@@ -65,16 +65,18 @@ const BULK_GROUPS = [...new Set(BULK_ACTIONS.map((action) => action.group))];
 /** Quiet footer action: small muted ghost link, paper-deep on hover. */
 const GHOST_ACTION = `inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-[var(--ink-muted)] no-underline transition-colors hover:bg-[var(--paper-deep)] hover:text-[var(--ink)] ${SELECTION.focus}`;
 
-/** One full-width flag row: short visible label left, small track right, full flag name as the accessible name. */
+/** One flag control: the status pill itself is the switch. Ink fill when on, quiet dashed when off. */
 function FlagSwitch({
   label,
   ariaLabel,
+  icon,
   checked,
   disabled,
   onChange,
 }: {
   label: string;
   ariaLabel: string;
+  icon?: ReactNode;
   checked: boolean;
   disabled: boolean;
   onChange: (next: boolean) => void;
@@ -87,52 +89,24 @@ function FlagSwitch({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-md border px-3 text-left text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus} ${
-        checked
-          ? "border-[var(--ink)] bg-[var(--paper-deep)] text-[var(--ink)]"
-          : "border-[var(--ink-muted)]/25 bg-[var(--ifn-surface,#fff)] text-[var(--ink-muted)] hover:border-[var(--ink-muted)]/60"
-      }`}
+      className={`group inline-flex min-h-11 shrink-0 items-center rounded-full disabled:cursor-wait disabled:opacity-60 ${SELECTION.focus}`}
     >
-      <span className="whitespace-nowrap">{label}</span>
       <span
-        aria-hidden="true"
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
+        className={`${
           checked
-            ? "border-[var(--ink)] bg-[var(--ifn-surface,#fff)]"
-            : "border-[var(--ink-muted)]/40 bg-transparent"
-        }`}
+            ? `${PILL_ON} border border-[var(--ink)]`
+            : `${PILL_OFF} inline-flex items-center gap-1 group-hover:border-[var(--ink-muted)]/70 group-hover:text-[var(--ink)]`
+        } whitespace-nowrap transition-colors`}
       >
-        <span
-          className={`absolute h-3.5 w-3.5 rounded-full transition-all ${
-            checked ? "left-[calc(100%-1rem)] bg-[var(--ink)]" : "left-0.5 bg-[var(--ink-muted)]/50"
-          }`}
-        />
+        {icon}
+        {label}
       </span>
     </button>
   );
 }
 
 function StatusPills({ item }: { item: AdminLibraryAsset }) {
-  const anyOn = item.downloadable || item.teaserPublic || item.landingFull;
-  return (
-    <>
-      <span className={PILL_NEUTRAL}>{item.tag}</span>
-      {item.downloadable ? (
-        <span className={PILL_ON}>
-          <Lock size={12} aria-hidden="true" />
-          Members
-        </span>
-      ) : null}
-      {item.teaserPublic ? <span className={PILL_ON}>Teaser</span> : null}
-      {item.landingFull ? (
-        <span className={PILL_ON}>
-          <Globe size={12} aria-hidden="true" />
-          Landing full
-        </span>
-      ) : null}
-      {!anyOn ? <span className={PILL_OFF}>Off</span> : null}
-    </>
-  );
+  return <span className={PILL_NEUTRAL}>{item.tag}</span>;
 }
 
 export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
@@ -480,7 +454,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                     <div
                       role="group"
                       aria-label={`Approve ${item.title}`}
-                      className="mb-4 flex w-full flex-col gap-1.5"
+                      className="mb-4 flex w-full flex-wrap items-center gap-2"
                     >
                       <FlagSwitch
                         label="Teaser"
@@ -492,6 +466,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                       <FlagSwitch
                         label="Members"
                         ariaLabel="Member download"
+                        icon={<Lock size={12} aria-hidden="true" />}
                         checked={item.downloadable}
                         disabled={busy}
                         onChange={(next) => void save(item.slug, { downloadable: next })}
@@ -499,6 +474,7 @@ export function LibraryAdmin({ items }: { items: AdminLibraryAsset[] }) {
                       <FlagSwitch
                         label="Landing"
                         ariaLabel="Landing full"
+                        icon={<Globe size={12} aria-hidden="true" />}
                         checked={item.landingFull}
                         disabled={busy}
                         onChange={(next) => void save(item.slug, { landingFull: next })}
