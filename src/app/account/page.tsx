@@ -4,6 +4,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
 import { isMemberEntitled } from "@/lib/membership";
+import { isSlackEligible, resolveSlackInvite } from "@/lib/slack-invite";
 
 /** Soft-fail notes for /api/stripe/portal bounce-backs. */
 const PORTAL_NOTES: Record<string, string> = {
@@ -29,6 +30,18 @@ export default async function AccountPage({
   const entitlement = email
     ? await isMemberEntitled(email)
     : { entitled: false as const, reason: "no_email" as const };
+
+  const slackEligible = isSlackEligible(entitlement);
+  // Read at request time (page is dynamic via auth()). Never log the URL.
+  const slackInvite = slackEligible
+    ? resolveSlackInvite(
+        {
+          SLACK_INVITE_URL: process.env.SLACK_INVITE_URL,
+          SLACK_INVITE_EXPIRES_AT: process.env.SLACK_INVITE_EXPIRES_AT,
+        },
+        new Date(),
+      )
+    : null;
 
   const planLabel = entitlement.entitled
     ? entitlement.inGrace
@@ -103,6 +116,40 @@ export default async function AccountPage({
           <SignOutButton />
         </div>
       </section>
+
+      {slackInvite ? (
+        <section className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-6 shadow-sm space-y-4">
+          <div>
+            <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--ink-muted)]">
+              Members Slack
+            </h2>
+            <p className="mt-1 text-[var(--ink-muted)]">
+              Your membership includes the IFN Members Slack workspace.
+            </p>
+          </div>
+          {slackInvite.url ? (
+            <a
+              href={slackInvite.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-full bg-[var(--crimson)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            >
+              Join the Members Slack
+            </a>
+          ) : (
+            <p className="text-sm text-[var(--ink-muted)] leading-relaxed">
+              Your Slack invite is on its way. Email{" "}
+              <a
+                href="mailto:hello@ifn.community"
+                className="underline hover:text-[var(--crimson)]"
+              >
+                hello@ifn.community
+              </a>{" "}
+              and we&apos;ll invite you within 1 business day.
+            </p>
+          )}
+        </section>
+      ) : null}
     </div>
   );
 }
