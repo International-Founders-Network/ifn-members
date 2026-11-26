@@ -42,7 +42,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-[var(--paper)] text-[var(--ink)]">
         <ClerkProvider>
           <SiteHeader isAdmin={admin} />
-          <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>
+          <main className="mx-auto w-full max-w-[75rem] flex-1 px-4 py-8">{children}</main>
           <footer className="border-t border-[var(--ink-muted)]/15 py-6 text-center text-xs text-[var(--ink-muted)]">
             International Founders Network ·{" "}
             <a href="https://ifn.community" className="hover:text-[var(--crimson)]">

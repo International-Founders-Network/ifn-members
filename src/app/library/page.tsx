@@ -4,6 +4,7 @@ import { MemberLibrary } from "@/components/library/member-library";
 import { SoftCta } from "@/components/soft-cta";
 import { getVerifiedPrimaryEmail } from "@/lib/auth-helpers";
 import { listLibraryCatalogWithFlags } from "@/lib/library-assets";
+import { libraryPlacementForSlug } from "@/lib/library-placement";
 import { isMemberEntitled } from "@/lib/membership";
 
 export default async function LibraryPage() {
@@ -24,8 +25,8 @@ export default async function LibraryPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Library</h1>
         <p className="mt-2 text-[var(--ink-muted)]">
-          Pack A: practical founder guides. Full PDFs for entitled members when
-          download is enabled.
+          Practical founder guides. Pick who you are and your stage. Full PDFs
+          for entitled members when download is enabled.
         </p>
       </div>
 
@@ -58,6 +59,7 @@ export default async function LibraryPage() {
           tag: item.tag,
           canDownload:
             entitlement.entitled && Boolean(assetFlags[item.slug]?.downloadable),
+          ...libraryPlacementForSlug(item.slug),
         }))}
       />
     </div>
