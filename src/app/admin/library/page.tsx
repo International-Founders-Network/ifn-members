@@ -2,21 +2,24 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LibraryAdmin } from "@/components/admin/library-admin";
-import { isClerkAdmin } from "@/lib/auth-helpers";
+import { getStaffContext } from "@/lib/auth-helpers";
 import { listLibraryAssetsForAdmin } from "@/lib/library-assets";
+import { hasPermission } from "@/lib/staff-permissions";
 
 export default async function AdminLibraryPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const admin = await isClerkAdmin();
-  if (!admin) {
+  const staff = await getStaffContext();
+  if (!hasPermission(staff, "library:admin")) {
     return (
       <div className="rounded-xl border border-[var(--ink-muted)]/20 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold">Staff only</h1>
         <p className="mt-2 text-[var(--ink-muted)] leading-relaxed">
           Library Admin requires Clerk{" "}
-          <code className="text-sm">publicMetadata.role = &quot;admin&quot;</code>.
+          <code className="text-sm">publicMetadata.staffRole</code> set to{" "}
+          <code className="text-sm">owner</code> or <code className="text-sm">admin</code>.
+          Legacy <code className="text-sm">role: &quot;admin&quot;</code> still works.
           Ask Venkat to set that in the Clerk Dashboard for your user.
         </p>
       </div>
@@ -37,10 +40,14 @@ export default async function AdminLibraryPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm text-[var(--ink-muted)]">
-          <Link href="/admin/members" className="hover:text-[var(--crimson)]">
-            View Members
-          </Link>
-          {" · "}
+          {hasPermission(staff, "roster:read") ? (
+            <>
+              <Link href="/admin/members" className="hover:text-[var(--crimson)]">
+                View Members
+              </Link>
+              {" · "}
+            </>
+          ) : null}
           Library
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library Admin</h1>

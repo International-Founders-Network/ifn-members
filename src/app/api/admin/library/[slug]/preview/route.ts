@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { isClerkAdmin } from "@/lib/auth-helpers";
+import { requireStaffPermission } from "@/lib/auth-helpers";
 import { resolveLibraryItem } from "@/lib/library-assets";
 import { createSignedUrlForExistingObject } from "@/lib/storage";
 
@@ -14,14 +13,8 @@ type Params = { params: Promise<{ slug: string }> };
  * `{ reason: "object_missing" }` naming the key.
  */
 export async function GET(req: Request, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  }
-
-  if (!(await isClerkAdmin())) {
-    return NextResponse.json({ error: "Admin only" }, { status: 403 });
-  }
+  const gate = await requireStaffPermission("library:admin");
+  if (!gate.ok) return gate.response;
 
   const { slug } = await params;
   const item = await resolveLibraryItem(slug);

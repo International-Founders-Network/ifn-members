@@ -2,7 +2,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
-import { isClerkAdmin } from "@/lib/auth-helpers";
+import { getStaffContext } from "@/lib/auth-helpers";
+import { hasPermission } from "@/lib/staff-permissions";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const admin = await isClerkAdmin();
+  const staff = await getStaffContext();
 
   return (
     <html
@@ -41,7 +42,10 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[var(--paper)] text-[var(--ink)]">
         <ClerkProvider>
-          <SiteHeader isAdmin={admin} />
+          <SiteHeader
+            canViewMembers={hasPermission(staff, "roster:read")}
+            canAdminLibrary={hasPermission(staff, "library:admin")}
+          />
           <main className="mx-auto w-full max-w-[75rem] flex-1 px-4 py-8">{children}</main>
           <footer className="border-t border-[var(--ink-muted)]/15 py-6 text-center text-xs text-[var(--ink-muted)]">
             International Founders Network ·{" "}

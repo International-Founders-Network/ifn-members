@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { isClerkAdmin } from "@/lib/auth-helpers";
+import { requireStaffPermission } from "@/lib/auth-helpers";
 import { isValidLibrarySlug } from "@/lib/library-catalog";
 import { UnknownLibrarySlugError, setLibraryItemFlags } from "@/lib/library-assets";
 import { parseLibraryFlagsPatch } from "@/lib/library-flags";
@@ -16,14 +15,8 @@ type Params = { params: Promise<{ slug: string }> };
  * Admin lists them).
  */
 export async function PATCH(req: Request, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  }
-
-  if (!(await isClerkAdmin())) {
-    return NextResponse.json({ error: "Admin only" }, { status: 403 });
-  }
+  const gate = await requireStaffPermission("library:admin");
+  if (!gate.ok) return gate.response;
 
   const { slug } = await params;
   if (!isValidLibrarySlug(slug)) {
@@ -48,10 +41,10 @@ export async function PATCH(req: Request, { params }: Params) {
     );
   }
 
-  const user = await currentUser();
+  const { user, userId } = gate;
   const updatedBy =
-    user?.primaryEmailAddress?.emailAddress ??
-    user?.emailAddresses[0]?.emailAddress ??
+    user.primaryEmailAddress?.emailAddress ??
+    user.emailAddresses[0]?.emailAddress ??
     userId;
 
   try {

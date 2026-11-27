@@ -15,23 +15,51 @@ Thin member app for [International Founders Network](https://ifn.community) at *
 | `/` | Plan status, Library CTA, or Become a member |
 | `/library` | Pack A as a searchable, filterable Resources-style card grid; Download PDF only when entitled **and** Admin turned on **Member download** for that file |
 | `/account` | Email, plan, Stripe Customer Portal, Sign out |
-| `/admin/members` | Full Neon roster — Clerk `publicMetadata.role === "admin"` only |
-| `/admin/library` | Resources-style cards for **every asset on R2** (auto-discovered + seeded) with **Approve public**, **Public teaser**, **Member download**, **Landing full download** switches, full/teaser PDF previews, multi-select and a sticky **bulk action bar** (Neon `library_assets`) — same admin role. Only Library SoT |
+| `/admin/members` | Full Neon roster. Needs staff permission `roster:read` (Clerk `staffRole` `owner` or `admin`, or legacy `role: "admin"`). See [Staff roles](#staff-roles) |
+| `/admin/library` | Resources-style cards for **every asset on R2** (auto-discovered + seeded) with **Approve public**, **Public teaser**, **Member download**, **Landing full download** switches, full/teaser PDF previews, multi-select and a sticky **bulk action bar** (Neon `library_assets`). Needs staff permission `library:admin`. Only Library SoT |
 | `/api/public/library` | Public JSON catalog (copy + flags + object keys, no auth, no secrets) for landing |
 | `/api/public/library/[slug]/teaser`, `/full` | Public landing downloads (302 to signed URL) while the matching flag is on |
-| `PATCH /api/admin/library/flags/bulk` | Admin bulk flag save for up to 100 slugs |
+| `PATCH /api/admin/library/flags/bulk` | Admin bulk flag save for up to 100 slugs (`library:admin`) |
 
 Landing Google `/admin` is unchanged and does **not** show this roster or Library toggles. Members `/admin/library` is the single source of truth for Pack A flags.
 
-## Admin role
+## Staff roles
 
-In Clerk Dashboard → Users → select user → Public metadata:
+Staff roles live in Clerk `publicMetadata` and are read on every request with `currentUser()` (`src/lib/staff-permissions.ts`, `getStaffContext` / `requireStaffPermission` in `src/lib/auth-helpers.ts`). Staff role is **not** paid membership: Library access still comes only from Neon `memberships` (`isMemberEntitled`).
 
 ```json
-{ "role": "admin" }
+{ "staffRole": "owner", "chapters": ["austin"] }
 ```
 
-Only that gates View Members in this app.
+- `staffRole`: `owner` | `admin` | `chapter_lead`.
+- `chapters`: optional array of chapter slugs. Non-strings and empty strings are dropped. Parsed for future chapter-scoped views; grants nothing on its own today.
+
+| `staffRole` | Scope | `roster:read` | `library:admin` | `staff:grant` |
+| --- | --- | --- | --- | --- |
+| `owner` | All chapters | yes | yes | yes |
+| `admin` | All chapters | yes | yes | no |
+| `chapter_lead` | Listed `chapters` only | no | no | no |
+| none / unknown | | no | no | no |
+
+- `roster:read`: `/admin/members` (global Neon roster) and the **View Members** header link.
+- `library:admin`: `/admin/library`, the **Library Admin** header link and every `/api/admin/library/*` route (single flags, preview, bulk).
+- `staff:grant`: reserved for `owner`. No API or UI yet; roles are granted in the Clerk Dashboard.
+
+Hierarchy: `owner` ⊇ `admin` ⊇ `chapter_lead`. In v1 `chapter_lead` cannot load the global roster or change Library flags.
+
+Resolution (fail closed): signed out ⇒ nothing. A valid `staffRole` wins. Otherwise legacy `role: "admin"` counts as `staffRole: "admin"` (also when `staffRole` is missing, empty or misspelled). Anything else ⇒ no staff permissions. Pages show a soft **Staff only** panel; API routes return 401 `Sign in required` / 403 `Admin only`. The header links are display only; the server always re-checks.
+
+### Clerk Dashboard steps
+
+Clerk Dashboard → (Production instance) → Users → select user → **Public metadata** → edit JSON, e.g. `{ "staffRole": "admin" }` or `{ "staffRole": "chapter_lead", "chapters": ["austin"] }` → Save. Takes effect on the next page load. No session token (JWT) customization and no new env vars are required.
+
+### Legacy `role: "admin"` migration
+
+`{ "role": "admin" }` (the original bootstrap) still means full admin, same as `staffRole: "admin"`. After this ships, set `"staffRole": "owner"` on Venkat's user; `role: "admin"` may stay until a later cleanup PR removes the fallback.
+
+Landing Google `/admin` is a separate allowlist and is unchanged. It is not tied to these roles.
+
+Optional later: copy `publicMetadata` into session claims to skip the `currentUser()` call. Not needed today.
 
 ## Entitlement (locked)
 
@@ -159,7 +187,7 @@ Each card has a select checkbox (selected cards get an ink ring). **Select all f
 
 Every bulk action asks for confirmation. Per-card switches are unchanged.
 
-`PATCH /api/admin/library/flags/bulk` (Clerk admin only; 401/403 otherwise):
+`PATCH /api/admin/library/flags/bulk` (`library:admin` only; 401/403 otherwise):
 
 ```json
 { "slugs": ["visa-pathways", "cap-table-basics"], "patch": { "approvePublic": true } }
@@ -177,7 +205,7 @@ Each Admin card has **Preview full PDF** and **Preview teaser PDF** (new tab):
 
 `GET /api/admin/library/[slug]/preview?kind=full|teaser`
 
-- Clerk admin only (401 signed out, 403 non-admin). Ignores all three flags: admins can always preview.
+- `library:admin` only (401 signed out, 403 otherwise). Ignores all three flags: admins can always preview.
 - HeadObject first; missing object ⇒ **403** `{ "error": "Object not found in R2: <key>", "reason": "object_missing" }`.
 - Success ⇒ **302** to a 5-minute signed R2 URL (`Cache-Control: no-store`). No R2 env ⇒ 503 `storage_not_configured`.
 
