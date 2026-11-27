@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { isClerkAdmin } from "@/lib/auth-helpers";
+import { requireStaffPermission } from "@/lib/auth-helpers";
 import { UnknownLibrarySlugError, setLibraryItemsFlags } from "@/lib/library-assets";
 import { isValidLibrarySlug } from "@/lib/library-catalog";
 import { parseLibraryBulkRequest } from "@/lib/library-flags";
@@ -17,14 +16,8 @@ import { parseLibraryBulkRequest } from "@/lib/library-flags";
  * All-or-nothing: one unknown slug (not PACK_A, no Neon row) ⇒ 404 and nothing is written.
  */
 export async function PATCH(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  }
-
-  if (!(await isClerkAdmin())) {
-    return NextResponse.json({ error: "Admin only" }, { status: 403 });
-  }
+  const gate = await requireStaffPermission("library:admin");
+  if (!gate.ok) return gate.response;
 
   let body: unknown;
   try {
@@ -38,10 +31,10 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const user = await currentUser();
+  const { user, userId } = gate;
   const updatedBy =
-    user?.primaryEmailAddress?.emailAddress ??
-    user?.emailAddresses[0]?.emailAddress ??
+    user.primaryEmailAddress?.emailAddress ??
+    user.emailAddresses[0]?.emailAddress ??
     userId;
 
   try {
